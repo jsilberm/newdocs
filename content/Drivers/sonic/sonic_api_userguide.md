@@ -357,7 +357,7 @@ Note: Caller thread continues to execute.  The responses are returned by a calle
 
 The **‘pnso_submit_request’** function returns immediately.  The request is completed in the background before invoking a caller-provided callback function. In this request, pointers are  provided for the request (*req) and response (*res) buffers, and poll function (*poll_func) and opaque poll context (**poll_ctx).  Competition status is polled for, indicating that the result is ready for processing.  The poll is done through the API-provided **‘pnso_poll_fn’** polling function pointer, in combination with the API-provided **‘pnso_poll_ctx’** for the polling function.   The API provides both the polling function and the polling function context to use when calling the polling function.    The caller has the responsibility for maintaining the corresponding polling context for each outstanding poll request.
 
-**_Please note: The callback function is called AFTER a successful poll check call, please see below:_**
+Please note: The callback function is called AFTER a successful poll check call, please see below:
 
 ![image alt text](/images/Drivers/sonic/PollNonBatchReq.png)
 
@@ -388,7 +388,7 @@ Note: Caller thread continues to execute.  The response is returned by a caller-
 
 The **‘pnso_add_to_batch’** and **‘pnso_flush_batch’** functions return immediately. In this request, pointers are provided for the request (*req) and response (*res) buffers, and poll function (*poll_func) and poll function context (**poll_ctx).   Both the (*poll_func) and the (**poll_ctx) are returned/provided by the API driver.  Completion status is polled for, indicating that  the result is ready for processing. The poll is done through the **‘pnso_poll_fn’** polling function pointer, in combination with the API-provided **‘pnso_poll_ctx’** for the polling function. The API provides both the polling function and the polling function context to use when calling the polling function.    The caller has the responsibility for maintaining the corresponding polling context for each outstanding poll request.
 
-**_Please note: The callback function is called AFTER a successful poll check call.  Please see below:_**
+Please note: The callback function is called AFTER a successful poll check call.  Please see below:
 
 ![image alt text](/images/Drivers/sonic/PollBatchReq.png)
 
@@ -492,24 +492,24 @@ API initialization is required before the offload services can be invoked. Initi
 The **‘pnso_init’** expect to be passed initialization parameters for the offload services.  This is done through the struct **‘pnso_init_params’**.  The **‘pnso_init’** function will return **‘PNSO_OK’** indicating success, or **‘-EINVAL’** if invalid parameters where passed.
 
 The function **‘pnso_init’** is defined as follows:
+```
+pnso_error_t pnso_init(struct pnso_init_params *init_params);
+```
 
-**pnso_error_t pnso_init(struct pnso_init_params *init_params);**
+Please note:* Caller is responsible for allocation and deallocation of memory for input parameters.*
 
-**_Please note:_*** Caller is responsible for allocation and deallocation of memory for input parameters.*
-
-The **‘****_pnso_init_params_****’** represents the initialization parameters for Pensando offload services. It is a struct and is defined as follow:
+The **‘**pnso_init_params**’** represents the initialization parameters for Pensando offload services. It is a struct and is defined as follow:
 
 * per_core_qdepth: Specifies the maximum number of parallel outstanding requests per host CPU core.
 
 * block_size: Specifies the native filesystem block size in bytes.
 
-**_struct pnso_init_params {_**
-
-**_    uint16_t per_core_qdepth;_**
-
-**_    uint32_t block_size;_**
-
-**_};_**
+```
+struct pnso_init_params {
+    uint16_t per_core_qdepth;
+    uint32_t block_size;
+};
+```
 
 Setting the "**per_core_qdepth**" should aim to balance request concurrency with system memory use.  Setting the value too low may result in service request not being accepted by the API.   Setting the value too high may consume memory unnecessarily.    
 
@@ -521,13 +521,13 @@ The crypto accelerator service requires first registering the crypto key descrip
 
 XTS (XEX-based tweaked-codebook mode with ciphertext stealing) is a symmetric algorithm and requires a key, and a key index definition in the key index descriptor table.
 
-The initialization is done by calling the **‘pnso_set_key_dec_idx’ **function and set the key for data encryption and a key for the descriptor index, please see below:
+The initialization is done by calling the **pnso_set_key_dec_idx** function and set the key for data encryption and a key for the descriptor index, please see below:
 
 * **key1**: Specifies the key that will be used to encrypt the data
 
 * **key2**: Specifies the key that will be used to encrypt initialization vector
 
-* key_size: Specifies the size of the key in bytes -- 16 and 32 bytes for AES128 and AES256 respectively.
+* **key_size**: Specifies the size of the key in bytes -- 16 and 32 bytes for AES128 and AES256 respectively.
 
 * **key_idx**: Specifies the key index in the descriptor table.
 
@@ -537,13 +537,13 @@ Return Value:
 
 * -EINVAL - on invalid input parameters
 
-**_pnso_error_t pnso_set_key_desc_idx(const void *key1,_**
+```
+pnso_error_t pnso_set_key_desc_idx(const void *key1,
+             	  const void *key2,
+             	  uint32_t key_size, uint32_t key_idx);
+```
 
-**_             	  const void *key2,_**
-
-**_             	  uint32_t key_size, uint32_t key_idx);_**
-
-**_Please note:_*** The caller is responsible for allocation/deallocation of memory for input parameters.*
+Please note: The caller is responsible for allocation/deallocation of memory for input parameters.
 
 #### Compression Engine Initialization
 
@@ -561,11 +561,11 @@ Return Value:
 
 * -EINVAL - on invalid input parameters
 
-**_pnso_error_t pnso_register_compression_header_format(_**
-
-**_        struct pnso_compression_header_format *cp_hdr_fmt,_**
-
-**_        uint16_t hdr_fmt_idx);_**
+```
+pnso_error_t pnso_register_compression_header_format(
+        struct pnso_compression_header_format *cp_hdr_fmt,
+        uint16_t hdr_fmt_idx);
+```
 
 Algorithm mapping is done by calling the **‘pnso_add_compression_algo_mapping**’ function and providing the compression algorithm number (Please see the API reference for a complete list of algorithms supported), and the compression header algorithm number.  Please see below:
 
@@ -579,13 +579,14 @@ Return Value:
 
 * -EINVAL - on invalid input parameters
 
-**_pnso_error_t pnso_add_compression_algo_mapping(_**
+```
+pnso_error_t pnso_add_compression_algo_mapping(
+        enum pnso_compression_type pnso_algo,
+        uint32_t header_algo);
+```
 
-**_        enum pnso_compression_type pnso_algo,_**
 
-**_        uint32_t header_algo);_**
-
-**_Please Note:_*** Caller is responsible for managing the hdr_fmt_idx space and allocation/deallocation of memory for input parameters*
+**Please Note:** Caller is responsible for managing the hdr_fmt_idx space and allocation/deallocation of memory for input parameters
 
 ### Offload Service Descriptors
 
@@ -607,29 +608,20 @@ The crypto service is defined using the **‘pnso_service’**.  Please note tha
 
 The other services in this struct are described together with the corresponding accelerator service in this document.
 
-**_struct pnso_service {_**
-
-**_    uint16_t svc_type;_**
-
-**_    uint16_t rsvd;_**
-
-**_    union {_**
-
-**_        struct pnso_crypto_desc crypto_desc;_**
-
-**_        struct pnso_compression_desc cp_desc;_**
-
-**_        struct pnso_decompression_desc dc_desc;_**
-
-**_        struct pnso_hash_desc hash_desc;_**
-
-**_        struct pnso_checksum_desc chksum_desc;_**
-
-**_        struct pnso_decompaction_desc decompact_desc;_**
-
-**_    } u;_**
-
-**_};_**
+```
+struct pnso_service {
+    uint16_t svc_type;
+    uint16_t rsvd;
+    union {
+        struct pnso_crypto_desc crypto_desc;
+        struct pnso_compression_desc cp_desc;
+        struct pnso_decompression_desc dc_desc;
+        struct pnso_hash_desc hash_desc;
+        struct pnso_checksum_desc chksum_desc;
+        struct pnso_decompaction_desc decompact_desc;
+    } u;
+};
+```
 
 The **‘pnso_crypto_desc’** is the descriptor for encryption or decryption operation, it is a struct and is defined as follow:
 
@@ -641,69 +633,55 @@ The **‘pnso_crypto_desc’** is the descriptor for encryption or decryption op
 
 * **iv_addr**: Specifies the physical address of the initialization vector.
 
-**_struct pnso_crypto_desc {_**
-
-**_    uint16_t algo_type;_**
-
-**_    uint16_t rsvd;_**
-
-**_    uint32_t key_desc_idx;_**
-
-**_    uint64_t iv_addr;_**
-
-**_};_**
+```
+struct pnso_crypto_desc {
+    uint16_t algo_type;
+    uint16_t rsvd;
+    uint32_t key_desc_idx;
+    uint64_t iv_addr;
+};
+```
 
 The **‘pnso_crypto_type’** is an enum and is defined as follow:
 
-**_enum pnso_crypto_type {_**
-
-**_    PNSO_CRYPTO_TYPE_NONE = 0,_**
-
-**_    PNSO_CRYPTO_TYPE_XTS = 1,_**
-
-**_    PNSO_CRYPTO_TYPE_MAX_**
-
-**_};_**
+```
+enum pnso_crypto_type {
+    PNSO_CRYPTO_TYPE_NONE = 0,
+    PNSO_CRYPTO_TYPE_XTS = 1,
+    PNSO_CRYPTO_TYPE_MAX
+};
+```
 
 This list allows capabilities to be extended with additional crypto types in future releases.   For a complete list, please refer to the API Reference Guide.   Currently, XTS is the only crypto service supported.
 
 #### Compression/Decompression Engine
 
-The compression service is defined using the **‘pnso_service’**.  Please note that it is a ‘union’, and for the compression accelerator the **‘****_pnso_compression_desc_****’** or ‘**_pnso_decompression_desc_****’ **are used. The **‘pnso_service’** is defined as follows:
+The compression service is defined using the **‘pnso_service’**.  Please note that it is a ‘union’, and for the compression accelerator the **‘**pnso_compression_desc**’** or ‘pnso_decompression_desc**’ **are used. The **‘pnso_service’** is defined as follows:
 
 * **svc_type**: specifies one of the enumerated values for the accelerator service type (for compression/decompression it would be defined as either ‘pnso_compression_desc’ or ‘pnso_decompression_desc’).
 
 * **rsvd**: specifies a 'reserved' field meant to be used by Pensando.
 
-* **_cp_desc/dc_desc_**: struct that specifies the descriptor for compression/decompression services.
+* cp_desc/dc_desc: struct that specifies the descriptor for compression/decompression services.
 
 The other services in this struct are described together with the corresponding accelerator service in this document.
 
-**_struct pnso_service {_**
+```
+struct pnso_service {
+    uint16_t svc_type;
+    uint16_t rsvd;
+    union {
+        struct pnso_crypto_desc crypto_desc;
+        struct pnso_compression_desc cp_desc;
+        struct pnso_decompression_desc dc_desc;
+        struct pnso_hash_desc hash_desc;
+        struct pnso_checksum_desc chksum_desc;
+        struct pnso_decompaction_desc decompact_desc;
+    } u;
+};
+```
 
-**_    uint16_t svc_type;_**
-
-**_    uint16_t rsvd;_**
-
-**_    union {_**
-
-**_        struct pnso_crypto_desc crypto_desc;_**
-
-**_        struct pnso_compression_desc cp_desc;_**
-
-**_        struct pnso_decompression_desc dc_desc;_**
-
-**_        struct pnso_hash_desc hash_desc;_**
-
-**_        struct pnso_checksum_desc chksum_desc;_**
-
-**_        struct pnso_decompaction_desc decompact_desc;_**
-
-**_    } u;_**
-
-**_};_**
-
-The **‘****_pnso_compression_desc_****’** is the descriptor for compression operation.  It is a struct and defined as follow:
+The **‘**pnso_compression_desc**’** is the descriptor for compression operation.  It is a struct and defined as follow:
 
 * **algo_type**:  Specifies one of the enumerated values of the compressor algorithm (i.e. **pnso_compression_type**).
 
@@ -732,21 +710,17 @@ The **‘****_pnso_compression_desc_****’** is the descriptor for compression 
 
 * **hdr_algo**: specifies the value for header field PNSO_HDR_FIELD_TYPE_ALGO (This is the same value that is registered in ‘**pnso_add_compression_algo_mapping’**).
 
-**_struct pnso_compression_desc {_**
+```
+struct pnso_compression_desc {
+    uint16_t algo_type;
+    uint16_t flags;
+    uint16_t threshold_len;
+    uint16_t hdr_fmt_idx;
+    uint32_t hdr_algo;
+};
+```
 
-**_    uint16_t algo_type;_**
-
-**_    uint16_t flags;_**
-
-**_    uint16_t threshold_len;_**
-
-**_    uint16_t hdr_fmt_idx;_**
-
-**_    uint32_t hdr_algo;_**
-
-**_};_**
-
-The **‘****_pnso_decompression_desc_****’** is the descriptor for the compression operation.  It is a struct, defined as follows:
+The **‘**pnso_decompression_desc**’** is the descriptor for the compression operation.  It is a struct, defined as follows:
 
 * **algo_type**: specifies one of the enumerated values of the compressor algorithm (i.e. **pnso_compression_type**) for decompression.
 
@@ -764,67 +738,52 @@ The **‘****_pnso_decompression_desc_****’** is the descriptor for the compre
 
 * **rsvd**: specifies a 'reserved' field meant to be used by Pensando.
 
-**_struct pnso_decompression_desc {_**
+```
+struct pnso_decompression_desc {
+    uint16_t algo_type;
+    uint16_t flags;
+    uint16_t hdr_fmt_idx;
+    uint16_t rsvd;
+};
+```
 
-**_    uint16_t algo_type;_**
-
-**_    uint16_t flags;_**
-
-**_    uint16_t hdr_fmt_idx;_**
-
-**_    uint16_t rsvd;_**
-
-**_};_**
-
-The **‘****_pnso_compression_type_****’** is an enum and is defined as follows:
-
-**_enum pnso_compression_type {_**
-
-**_    PNSO_COMPRESSION_TYPE_NONE = 0,_**
-
-**_    PNSO_COMPRESSION_TYPE_LZRW1A = 1,_**
-
-**_    PNSO_COMPRESSION_TYPE_MAX_**
-
-**_};_**
+The **pnso_compression_type** is an enum and is defined as follows:
+```
+enum pnso_compression_type {
+    PNSO_COMPRESSION_TYPE_NONE = 0,
+    PNSO_COMPRESSION_TYPE_LZRW1A = 1,
+    PNSO_COMPRESSION_TYPE_MAX
+};
+```
 
 This list allows capabilities to be extended with additional crypto types in future releases.   For a complete list, please refer to the API Reference Guide.   Currently, LZRW1A is the only compression service supported.
 
 #### Hash Engine
 
-The hash service is defined using the **‘pnso_service’**.  Please note that it is a ‘union’, and for the compression accelerator the **‘****_pnso_hash_desc_****’** is used. The **‘pnso_service’** is defined as follows:
+The hash service is defined using the **‘pnso_service’**.  Please note that it is a ‘union’, and for the compression accelerator the **‘**pnso_hash_desc**’** is used. The **‘pnso_service’** is defined as follows:
 
-* **svc_type**: specifies one of the enumerated values for the accelerator service type (for hash calculation it would be defined as **‘****_pnso_hash_desc’_***.*
+* **svc_type**: specifies one of the enumerated values for the accelerator service type (for hash calculation it would be defined as **‘**pnso_hash_desc’*.*
 
 * **rsvd**: specifies a 'reserved' field meant to be used by Pensando.
 
-* **_hash_desc_**: struct that specifies the descriptor for data deduplication service.
+* hash_desc: struct that specifies the descriptor for data deduplication service.
 
 The other services in this struct are described together with the corresponding accelerator service in this document.
 
-**_struct pnso_service {_**
-
-**_    uint16_t svc_type;_**
-
-**_    uint16_t rsvd;_**
-
-**_    union {_**
-
-**_        struct pnso_crypto_desc crypto_desc;_**
-
-**_        struct pnso_compression_desc cp_desc;_**
-
-**_        struct pnso_decompression_desc dc_desc;_**
-
-**_        struct pnso_hash_desc hash_desc;_**
-
-**_        struct pnso_checksum_desc chksum_desc;_**
-
-**_        struct pnso_decompaction_desc decompact_desc;_**
-
-**_    } u;_**
-
-**_};_**
+```
+struct pnso_service {
+    uint16_t svc_type;
+    uint16_t rsvd;
+    union {
+        struct pnso_crypto_desc crypto_desc;
+        struct pnso_compression_desc cp_desc;
+        struct pnso_decompression_desc dc_desc;
+        struct pnso_hash_desc hash_desc;
+        struct pnso_checksum_desc chksum_desc;
+        struct pnso_decompaction_desc decompact_desc;
+    } u;
+};
+```
 
 The **‘pnso_hash_desc’** is the descriptor for hash calculation operation.  It is a struct and defined as follow:
 
@@ -841,65 +800,52 @@ When this flag is not specified, hash for the entire buffer will be produced.</t
 </table>
 
 
-**_struct pnso_hash_desc {_**
+```
+struct pnso_hash_desc {
+    uint16_t algo_type;
+    uint16_t flags;
+};
+```
 
-**_    uint16_t algo_type;_**
+The pnso_hash_type is an enum and is defined as follow:
 
-**_    uint16_t flags;_**
-
-**_};_**
-
-The **_pnso_hash_type_** is an enum and is defined as follow:
-
-**_enum pnso_hash_type {_**
-
-**_    PNSO_HASH_TYPE_NONE = 0,_**
-
-**_    PNSO_HASH_TYPE_SHA2_512 = 1,_**
-
-**_    PNSO_HASH_TYPE_SHA2_256 = 2,_**
-
-**_    PNSO_HASH_TYPE_MAX_**
-
-**_};_**
+```
+enum pnso_hash_type {
+    PNSO_HASH_TYPE_NONE = 0,
+    PNSO_HASH_TYPE_SHA2_512 = 1,
+    PNSO_HASH_TYPE_SHA2_256 = 2,
+    PNSO_HASH_TYPE_MAX
+};
+```
 
 #### Checksum Engine
 
-The checksum service is defined using the **‘pnso_service’**.  Please note that it is a ‘union’, and for the checksum accelerator the **‘****_pnso_checksum_desc_****’** is used. The **‘pnso_service’** is defined as follows:
+The checksum service is defined using the **‘pnso_service’**.  Please note that it is a ‘union’, and for the checksum accelerator the **‘**pnso_checksum_desc**’** is used. The **‘pnso_service’** is defined as follows:
 
-* **svc_type**: specifies one of the enumerated values for the accelerator service type (for hash calculation it would be defined as **‘****_pnso_checksum_desc’_***.*
+* **svc_type**: specifies one of the enumerated values for the accelerator service type (for hash calculation it would be defined as **‘**pnso_checksum_desc’*.*
 
 * **rsvd**: specifies a 'reserved' field meant to be used by Pensando.
 
-* **_chksum_desc_**: struct that specifies the descriptor for the checksum calculation service.
+* chksum_desc: struct that specifies the descriptor for the checksum calculation service.
 
 The other services in this struct are described together with the corresponding accelerator service in this document.
 
-**_struct pnso_service {_**
+```
+struct pnso_service {
+    uint16_t svc_type;
+    uint16_t rsvd;
+    union {
+        struct pnso_crypto_desc crypto_desc;
+        struct pnso_compression_desc cp_desc;
+        struct pnso_decompression_desc dc_desc;
+        struct pnso_hash_desc hash_desc;
+        struct pnso_checksum_desc chksum_desc;
+        struct pnso_decompaction_desc decompact_desc;
+    } u;
+};
+```
 
-**_    uint16_t svc_type;_**
-
-**_    uint16_t rsvd;_**
-
-**_    union {_**
-
-**_        struct pnso_crypto_desc crypto_desc;_**
-
-**_        struct pnso_compression_desc cp_desc;_**
-
-**_        struct pnso_decompression_desc dc_desc;_**
-
-**_        struct pnso_hash_desc hash_desc;_**
-
-**_        struct pnso_checksum_desc chksum_desc;_**
-
-**_        struct pnso_decompaction_desc decompact_desc;_**
-
-**_    } u;_**
-
-**_};_**
-
-The ‘**_pnso_checksum_desc’_** is the descriptor for checksum calculation operation.  It is a struct and defined as follow:
+The ‘**pnso_checksum_desc**’ is the descriptor for checksum calculation operation.  It is a struct and defined as follow:
 
 * **algo_type**:  Specifies one of the enumerated values of the checksum algorithm (i.e. **pnso_chksum_type**).
 
@@ -913,13 +859,12 @@ The ‘**_pnso_checksum_desc’_** is the descriptor for checksum calculation op
 </table>
 
 
-**_struct pnso_checksum_desc {_**
-
-**_    uint16_t algo_type;_**
-
-**_    uint16_t flags;_**
-
-**_};_**
+```
+struct pnso_checksum_desc {
+    uint16_t algo_type;
+    uint16_t flags;
+};
+```
 
 ### Submitting an Offload Service Request
 
@@ -994,11 +939,11 @@ The **‘cb_func’** and ‘***cb_ctx’** are both caller-defined.     ‘**cb
 
 Correspondingly, ‘***poll_func’** and "****poll_ctx**" are both API-defined and opaque from the caller perspective.   After submitting a poll request, the caller can poll for completion status by calling the **“*poll_func**” while passing in the **“**poll_ctx**” that corresponds to the given outstanding request. 
 
-**_Please note:_*** The caller is responsible for allocation/deallocation of memory for both input and output parameters.  Caller should keep the memory intact (ex: req/res) until the Pensando accelerator returns the result via completion callback.*
+Please note:* The caller is responsible for allocation/deallocation of memory for both input and output parameters.  Caller should keep the memory intact (ex: req/res) until the Pensando accelerator returns the result via completion callback.*
 
 ### Access the Result
 
-The **‘****_pnso_service_result_****’** represents the result of the request upon completion for one or all services.  It is a struct and is defined as follow:
+The ‘**pnso_service_result**’ represents the result of the request upon completion for one or all services.  It is a struct and is defined as follow:
 
 * **err**: specifies the overall error code of the request. When set to '0', the request processing can be considered successful. Otherwise, one of the services in the request failed, and any output data should be discarded
 
@@ -1006,19 +951,17 @@ The **‘****_pnso_service_result_****’** represents the result of the request
 
 * **svc**: specifies an array of service status structures to report the status of each service within a request upon its completion
 
-**_Please note:_*** When ***_'err'_*** is set to ***_'0'_***, the overall request processing can be considered successful.  Otherwise, one of the services in the request is failed, and any output data should be discarded.*
+Please note:* When *'err'* is set to *'0'*, the overall request processing can be considered successful.  Otherwise, one of the services in the request is failed, and any output data should be discarded.*
 
-**struct pnso_service_result {**
+```
+struct pnso_service_result {
+    pnso_error_t err;
+    uint32_t num_services;
+    struct pnso_service_status svc[0];
+};
+```
 
-**    pnso_error_t err;**
-
-**    uint32_t num_services;**
-
-**    struct pnso_service_status svc[0];**
-
-**};**
-
-The "pnso_service_status" represents the result for an individual element within a “pnso_service_result” set.     It is a struct and is defined as follows:
+The **"pnso_service_status"** represents the result for an individual element within a “pnso_service_result” set.     It is a struct and is defined as follows:
 
 * **err**: specifies the overall error code of the request. When set to '0', the request processing can be considered successful. Otherwise, one of the services in the request failed, and any output data should be discarded
 
@@ -1030,8 +973,30 @@ The "pnso_service_status" represents the result for an individual element within
 
 **Please note**:   The caller is responsible for allocating all memory that is referenced by the SGL ("**pnso_buffer_list**" and all associated buffers)   
 
-**struct pnso_service_status {	pnso_error_t err;	uint16_t svc_type;	uint16_t rsvd_1;	union {		struct {			uint16_t num_tags;			uint16_t rsvd_2;			struct pnso_hash_tag *tags;		} hash;		struct {			uint16_t num_tags;			uint16_t rsvd_3;			struct pnso_chksum_tag *tags;		} chksum;		struct {			uint32_t data_len;			struct pnso_buffer_list *sgl;		} dst;	} u;}**
+```
+struct pnso_service_status {
+   pnso_error_t err;
+   uint16_t svc_type;
+   uint16_t rsvd_1;
+   union {
+      struct {
+          uint16_t num_tags;
+          uint16_t rsvd_2;
+          struct pnso_hash_tag *tags;
+       } hash;
+      struct {
+         uint16_t num_tags;
+         uint16_t rsvd_3;
+         struct pnso_chksum_tag *tags;
+      } chksum;
+      struct {
+           uint32_t data_len;
+           struct pnso_buffer_list *sgl;
+      } dst;
+    } u;
+}
 
+```
 # Coding Guidelines
 
 * Avoid "Synchronous" service requests, except for the most critical meta-data updates that require the strictest serialization. 
@@ -1052,7 +1017,7 @@ The "pnso_service_status" represents the result for an individual element within
 
 * Input SGL buffers can be in 1 byte increments
 
-* Output SGL buffers must be in "block size" increments, where “block size” corresponds to the “block_size” parameter given in the **_pnso_init_params_****_ _**function (e.g. 4096).
+* Output SGL buffers must be in "block size" increments, where “block size” corresponds to the “block_size” parameter given in the pnso_init_params function (e.g. 4096).
 
 # Logging
 
