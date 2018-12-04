@@ -1,0 +1,73 @@
+baseURL = "https://docs.pensando.io"
+
+languageCode = "en-us"
+DefaultContentLanguage = "en"
+title = "Pensando Docs"
+# theme = "hugo-theme-techdoc"
+# theme = "gohugoioTheme"
+theme = "hugo-theme-docdock"
+
+hasCJKLanguage = true
+metaDataFormat = "yaml"
+
+pygmentsUseClasses = true
+pygmentsCodefences = true
+
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir= false
+enableMissingTranslationPlaceholders = false
+
+[Params]
+
+    # Souce Code repository section
+    description = "Pensando Documentation Site"
+    github_repository = "https://github.com/pensando/docs.git"
+    version = "0.1.0"
+
+    # Documentation repository section
+    # documentation repository (set edit link to documentation repository)
+    github_doc_repository = "https://github.com/pensando/docs.git"
+
+    # Analytic section
+    google_analytics_id = "" # Your Google Analytics tracking id
+    tag_manager_container_id = "" # Your Google Tag Manager container id
+    google_site_verification = "" # Your Google Site Verification
+
+    # Theme settings section
+    dateformat = "" # default "2 Jan 2006"
+
+    # path name excluded from documentation menu
+    menu_exclusion = ["archives", "blog", "entry", "post", "posts"]
+
+
+anchor = "smart"
+
+
+## As of v0.20, all content files include a default "categories" value that's the same as the section. This was a cheap future-proofing method and should/could be changed accordingly.
+[taxonomies]
+  category = "categories"
+
+# Global menu section
+# High level items
+
+[[menu.main]]
+  name = "Hardware"
+  weight = 1
+  identifier = "Hardware"
+  url = "/Hardware/"
+
+
+[[menu.main]]
+  name = "Drivers"
+  weight = 2
+  identifier = "Drivers"
+  post = "break"
+  url = "/Drivers/"
+
+[[menu.main]]
+  name = "Management"
+  identifier = "Management"
+  weight = 3
+  post = "break"
+  url = "/Management/"
+
