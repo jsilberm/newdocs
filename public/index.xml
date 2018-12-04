@@ -10,5 +10,30 @@
 	<atom:link href="https://docs.pensando.io/index.xml" rel="self" type="application/rss+xml" />
     
     
+    <item>
+      <title>Sonic API Programmer&#39;s Guide</title>
+      <link>https://docs.pensando.io/drivers/sonic/sonic_api_userguide/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://docs.pensando.io/drivers/sonic/sonic_api_userguide/</guid>
+      <description>SONIC API User Guide
+Version 0.1.0
+ Dec 2, 2018  Table of Contents
+[[TOC]]
+Legal All information in this document is provided on a non-disclosure basis. Anyone reading this document implicitly agrees to be bound by Pensando Systems’ non-disclosure terms.
+Document Revision History   Revision Author Date Status and Description   0.1 Roger 2018-04-16 Initial Version   0.2 Jeff 2018-11-19 Target for 11/30 deliverables.   NAPLES Offload Engine Overview Introduction Pensando NAPLES is a SmartNIC capable of handling both network traffic as well as providing hardware and CPU offload for Encryption/Decryption, Compression/Decompression, hash and checksum calculations, also known as accelerator services.</description>
+    </item>
+    
+    <item>
+      <title>Venice REST API Getting Started Guide</title>
+      <link>https://docs.pensando.io/management/veniceapi/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://docs.pensando.io/management/veniceapi/</guid>
+      <description>Version 0.1.0
+Legal Stuff Document Revision History Document Overview This doucment convers the Pansando REST API, it is intended as a quick start guide, and assumes basic knowledge of REST based API&amp;rsquo;s.
+The Pensando Representational State Transfer Application Programing Interface (REST API) is a comprehensive interface that allows an application to programmatically interact with Venice. Venice CLI and GUI utilize the very same REST API to interact with Venice API Server, which means that all features that are available in the GUI and the CLI are also available via the API.</description>
+    </item>
+    
   </channel>
 </rss>

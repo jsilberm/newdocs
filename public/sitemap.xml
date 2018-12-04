@@ -3,17 +3,31 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://docs.pensando.io/categories/</loc>
-    <priority>0</priority>
+    <loc>https://docs.pensando.io/drivers/</loc>
+  </url>
+  
+  <url>
+    <loc>https://docs.pensando.io/hardware/</loc>
+  </url>
+  
+  <url>
+    <loc>https://docs.pensando.io/management/</loc>
+  </url>
+  
+  <url>
+    <loc>https://docs.pensando.io/drivers/sonic/sonic_api_userguide/</loc>
+  </url>
+  
+  <url>
+    <loc>https://docs.pensando.io/management/veniceapi/</loc>
   </url>
   
   <url>
     <loc>https://docs.pensando.io/</loc>
-    <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://docs.pensando.io/tags/</loc>
+    <loc>https://docs.pensando.io/categories/</loc>
     <priority>0</priority>
   </url>
   
