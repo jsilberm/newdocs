@@ -2,6 +2,7 @@
 title: Sonic API Programmer's Guide
 linktitle: Sonic API Programmer's Guide
 description: Sonic API Programmer's Guide
+categories: [Drivers]
 menu:
   docs:
     parent: "Drivers"
@@ -10,8 +11,6 @@ weight: 1
 draft: false
 toc: true
 ---
-
-SONIC API User Guide Version 0.1.0 Dec 2, 2018
 
 # Legal
 
@@ -450,7 +449,7 @@ struct pnso_flat_buffer {
 
 ### Scatter Gather List (SGL)
 
-The **‘pnso_buffer_list’ **defines a scatter/gather buffer list.   This structure is used to represent a collection of physical memory buffers that are not contiguous. The **‘count’** specifies the numbers of buffers in the list and **‘buffers’** specifies an unbounded array of flat buffers as defined by **‘count**’. The buffers are used for offload engine data requests and results. 
+The **‘pnso_buffer_list’** defines a scatter/gather buffer list.   This structure is used to represent a collection of physical memory buffers that are not contiguous. The **‘count’** specifies the numbers of buffers in the list and **‘buffers’** specifies an unbounded array of flat buffers as defined by **‘count**’. The buffers are used for offload engine data requests and results. 
 
 ```
 struct pnso_buffer_list {
@@ -496,13 +495,13 @@ The function **‘pnso_init’** is defined as follows:
 pnso_error_t pnso_init(struct pnso_init_params *init_params);
 ```
 
-Please note:* Caller is responsible for allocation and deallocation of memory for input parameters.*
+**Please note:** Caller is responsible for allocation and deallocation of memory for input parameters.
 
-The **‘**pnso_init_params**’** represents the initialization parameters for Pensando offload services. It is a struct and is defined as follow:
+The ‘**pnso_init_params**’ represents the initialization parameters for Pensando offload services. It is a struct and is defined as follow:
 
-* per_core_qdepth: Specifies the maximum number of parallel outstanding requests per host CPU core.
+* **per_core_qdepth**: Specifies the maximum number of parallel outstanding requests per host CPU core.
 
-* block_size: Specifies the native filesystem block size in bytes.
+* **block_size**: Specifies the native filesystem block size in bytes.
 
 ```
 struct pnso_init_params {
@@ -533,9 +532,9 @@ The initialization is done by calling the **pnso_set_key_dec_idx** function and 
 
 Return Value:
 
-* PNSO_OK - on success
+* **PNSO_OK** - on success
 
-* -EINVAL - on invalid input parameters
+* **-EINVAL** - on invalid input parameters
 
 ```
 pnso_error_t pnso_set_key_desc_idx(const void *key1,
@@ -543,7 +542,7 @@ pnso_error_t pnso_set_key_desc_idx(const void *key1,
              	  uint32_t key_size, uint32_t key_idx);
 ```
 
-Please note: The caller is responsible for allocation/deallocation of memory for input parameters.
+**Please note**: The caller is responsible for allocation/deallocation of memory for input parameters.
 
 #### Compression Engine Initialization
 
@@ -557,9 +556,9 @@ The registration is done by calling the ‘**pnso_register_compression_header_fo
 
 Return Value:
 
-* PNSO_OK - on success
+* **PNSO_OK** - on success
 
-* -EINVAL - on invalid input parameters
+* **-EINVAL** - on invalid input parameters
 
 ```
 pnso_error_t pnso_register_compression_header_format(
@@ -575,9 +574,9 @@ Algorithm mapping is done by calling the **‘pnso_add_compression_algo_mapping*
 
 Return Value:
 
-* PNSO_OK - on success
+* **PNSO_OK** - on success
 
-* -EINVAL - on invalid input parameters
+* **-EINVAL** - on invalid input parameters
 
 ```
 pnso_error_t pnso_add_compression_algo_mapping(
@@ -662,7 +661,7 @@ The compression service is defined using the **‘pnso_service’**.  Please not
 
 * **rsvd**: specifies a 'reserved' field meant to be used by Pensando.
 
-* cp_desc/dc_desc: struct that specifies the descriptor for compression/decompression services.
+* **cp_desc/dc_desc**: struct that specifies the descriptor for compression/decompression services.
 
 The other services in this struct are described together with the corresponding accelerator service in this document.
 
@@ -760,13 +759,13 @@ This list allows capabilities to be extended with additional crypto types in fut
 
 #### Hash Engine
 
-The hash service is defined using the **‘pnso_service’**.  Please note that it is a ‘union’, and for the compression accelerator the **‘**pnso_hash_desc**’** is used. The **‘pnso_service’** is defined as follows:
+The hash service is defined using the **‘pnso_service’**.  Please note that it is a ‘union’, and for the compression accelerator the ‘**pnso_hash_desc**’ is used. The **‘pnso_service’** is defined as follows:
 
-* **svc_type**: specifies one of the enumerated values for the accelerator service type (for hash calculation it would be defined as **‘**pnso_hash_desc’*.*
+* **svc_type**: specifies one of the enumerated values for the accelerator service type (for hash calculation it would be defined as ‘**pnso_hash_desc**’
 
 * **rsvd**: specifies a 'reserved' field meant to be used by Pensando.
 
-* hash_desc: struct that specifies the descriptor for data deduplication service.
+* **hash_desc**: struct that specifies the descriptor for data deduplication service.
 
 The other services in this struct are described together with the corresponding accelerator service in this document.
 
@@ -807,7 +806,7 @@ struct pnso_hash_desc {
 };
 ```
 
-The pnso_hash_type is an enum and is defined as follow:
+The **pnso_hash_type** is an enum and is defined as follow:
 
 ```
 enum pnso_hash_type {
@@ -820,7 +819,7 @@ enum pnso_hash_type {
 
 #### Checksum Engine
 
-The checksum service is defined using the **‘pnso_service’**.  Please note that it is a ‘union’, and for the checksum accelerator the **‘**pnso_checksum_desc**’** is used. The **‘pnso_service’** is defined as follows:
+The checksum service is defined using the **‘pnso_service’**.  Please note that it is a ‘union’, and for the checksum accelerator the ‘**pnso_checksum_desc**’ is used. The **‘pnso_service’** is defined as follows:
 
 * **svc_type**: specifies one of the enumerated values for the accelerator service type (for hash calculation it would be defined as **‘**pnso_checksum_desc’*.*
 
@@ -935,11 +934,11 @@ pnso_service_request
 </table>
 
 
-The **‘cb_func’** and ‘***cb_ctx’** are both caller-defined.     ‘**cb_func’** is the function to call upon request completion, and "***cb_ctx**" can be used as the user-supplied context to identify which outstanding request has completed.
+The **‘cb_func’** and ‘**cb_ctx’** are both caller-defined.     ‘**cb_func’** is the function to call upon request completion, and '***cb_ctx**' can be used as the user-supplied context to identify which outstanding request has completed.
 
-Correspondingly, ‘***poll_func’** and "****poll_ctx**" are both API-defined and opaque from the caller perspective.   After submitting a poll request, the caller can poll for completion status by calling the **“*poll_func**” while passing in the **“**poll_ctx**” that corresponds to the given outstanding request. 
+Correspondingly, ‘***poll_func’** and '****poll_ctx**' are both API-defined and opaque from the caller perspective.   After submitting a poll request, the caller can poll for completion status by calling the **“*poll_func**” while passing in the “***poll_ctx**” that corresponds to the given outstanding request. 
 
-Please note:* The caller is responsible for allocation/deallocation of memory for both input and output parameters.  Caller should keep the memory intact (ex: req/res) until the Pensando accelerator returns the result via completion callback.*
+**Please note:** The caller is responsible for allocation/deallocation of memory for both input and output parameters.  Caller should keep the memory intact (ex: req/res) until the Pensando accelerator returns the result via completion callback.
 
 ### Access the Result
 
@@ -951,7 +950,7 @@ The ‘**pnso_service_result**’ represents the result of the request upon comp
 
 * **svc**: specifies an array of service status structures to report the status of each service within a request upon its completion
 
-Please note:* When *'err'* is set to *'0'*, the overall request processing can be considered successful.  Otherwise, one of the services in the request is failed, and any output data should be discarded.*
+**Please note:** When '**err**' is set to '**0**', the overall request processing can be considered successful.  Otherwise, one of the services in the request is failed, and any output data should be discarded.
 
 ```
 struct pnso_service_result {
@@ -961,7 +960,7 @@ struct pnso_service_result {
 };
 ```
 
-The **"pnso_service_status"** represents the result for an individual element within a “pnso_service_result” set.     It is a struct and is defined as follows:
+The **"pnso_service_status"** represents the result for an individual element within a “**pnso_service_result**” set.     It is a struct and is defined as follows:
 
 * **err**: specifies the overall error code of the request. When set to '0', the request processing can be considered successful. Otherwise, one of the services in the request failed, and any output data should be discarded
 
@@ -969,7 +968,7 @@ The **"pnso_service_status"** represents the result for an individual element wi
 
 * **rsvd_1**:  reserved for use by Pensando.  Not to be used by caller.
 
-* **u**:  descriptor for output/result locations of the service requests.  For the compression/decompression offload services (PNSO_SVC_TYPE_COMPRESS or PNSO_SVC_TYPE_DECOMPRESS) the **dst **structure will be used, representing a SGL for the service result set.
+* **u**:  descriptor for output/result locations of the service requests.  For the compression/decompression offload services (PNSO_SVC_TYPE_COMPRESS or PNSO_SVC_TYPE_DECOMPRESS) the **dst** structure will be used, representing a SGL for the service result set.
 
 **Please note**:   The caller is responsible for allocating all memory that is referenced by the SGL ("**pnso_buffer_list**" and all associated buffers)   
 
