@@ -11,7 +11,7 @@ draft: false
 toc: false
 ---
 
-![Pensando Logo](images/Management/Pensando_Logo.png)
+![Pensando Logo](/images/Management/Pensando_Logo.png)
 
 
 NAPLES REST API Reference Guide
@@ -64,7 +64,7 @@ Venice is a separate software and is not coverd in this document. When Venice is
 The REST Clients should instead send their REST requests to the
 Venice management system. 
 
-![Naples vs Venice](images/Management/Naples_vs_Venice.png)
+![Naples vs Venice](/images/Management/Naples_vs_Venice.png)
 
 
 Please note that the Venice REST API is similar to NAPLES REST API, but they are not identical, please read the
@@ -79,7 +79,7 @@ When it comes to the REST API, the main component inside NAPLES is the Agent, it
 
 The Agent is written in Go language as a micro-service, the Agent is responsible for serving the REST API (and gRPC to and from Pensando Venice controller) requests to and from external REST clients, maintaining the object model and object relationships as well as communicate and manage the different hardware components via Hardware Abstraction Layer (HAL). The Objects are persistefied in an embedded BoltDB based database.
 
-![Naples vs Venice](images/Management/Naples_Agent_Overview.png)
+![Naples vs Venice](/images/Management/Naples_Agent_Overview.png)
 
 NAPLES REST API Design and Goals
 ================================
@@ -247,7 +247,7 @@ real.
 
 ... 
 
-![Single Object](images/Management/Single_Object.png)
+![Single Object](/images/Management/Single_Object.png)
 
 
 Object Relationships
@@ -257,7 +257,7 @@ Objects can express relationships in the model, by Named Reference, below is an 
 
 **Named Reference:**
 
-![Named Reference](images/Management/Named_Reference.png)
+![Named Reference](/images/Management/Named_Reference.png)
 
 
 Object “public-router” references a Network object by its name “public”
@@ -406,7 +406,7 @@ The tools have many features, one of them allows you to define a collection of m
 
 **Postman GUI, View:**
 
-![Postman GUI](images/Management/Postman_GUI.png)
+![Postman GUI](/images/Management/Postman_GUI.png)
 
 
 To get more details and information about the postman/Newman, please read the official documentation:
