@@ -1,3 +1,15 @@
+---
+title: NetApp Katana User Guide
+linktitle: NetApp Katana User Guide
+description: NetApp Katana User Guide
+menu:
+  docs:
+    parent: "Management"
+    weight: 1
+weight: 1
+draft: false
+toc: false
+---
 NetApp Katana Pensando User Guide
 =================================
 
@@ -5,9 +17,9 @@ Version:  0.1.1
 
 Date:      Dec 5, 2018
 
-![image alt text](/images/Management/Pensando_Logo.png)
+![image alt text](/images/Management/NetApp_Userguide/Pensando_Logo.png)
 
-![image alt text](/images/Management/NetApp_Logo.png)
+![image alt text](/images/Management/NetApp_Userguide/NetApp_Logo.png)
 
 [[TOC]]
 
@@ -56,7 +68,7 @@ Naples is a PCIe card providing for offload of network, storage, and security se
 Naples Architecture
 ===================
 
-![Naples Architecture](/images/Management/Naples_Architecture.png)
+![Naples Architecture](/images/Management/NetApp_Userguide/Naples_Architecture.png)
 
 
 The "2x100G / 8x25G" uplinks label refers to the various link speeds that are supported, including:
@@ -72,7 +84,7 @@ The "2x100G / 8x25G" uplinks label refers to the various link speeds that are su
 Capri Overview
 ==============
 
-![image alt text](/images/Management/Capri_Overview.png)
+![image alt text](/images/Management/NetApp_Userguide/Capri_Overview.png)
 
 3.3 NAPLES Software and Services
 ================================
@@ -95,7 +107,7 @@ Installation of the Naples adapter card requires following standard safety proce
 
 4. It is strongly recommended to use an ESD strap shown on a picture below or other antistatic devices. 
 
-![Screw Driver](/images/Management/Screw_Driver.png)![ESD Protection](/images/Management/ESD_Protection.png)  
+![Screw Driver](/images/Management/NetApp_Userguide/Screw_Driver.png)![ESD Protection](/images/Management/ESD_Protection.png)  
 
 To successfully install the card,  double check the following: 
 
@@ -119,7 +131,7 @@ To Install the card, follow the instructions below:
 
 5. When the adapter is properly seated, the port connectors are aligned with the slot opening, and the adapter faceplate is visible against the system chassis. 
 
-![image alt text](/images/Management/Adapter_Cage.png)
+![image alt text](/images/Management/NetApp_Userguide/Adapter_Cage.png)
 
 6. Secure the adapter with the adapter clips or screws. 
 
@@ -140,7 +152,7 @@ Use Safety Precautions when working on removing the network card.  Follow the sa
 
 5. When the port connectors reach the top of the chassis window, gently pull the adapter card in parallel to the motherboard like shown on Figure 1.
 
-.![image alt text](/images/Management/Remove_PCIe_Card.png)
+.![image alt text](/images/Management/NetApp_Userguide/Remove_PCIe_Card.png)
 
 4.3 PCIe Supported
 ------------------
@@ -183,7 +195,7 @@ Naples Smart I/O subsystem requires that the server’s cooling system support c
 
 The overall design is described in the following diagram, which allows the host to manage Naples as an entity visible through internal IP connectivity.
 
-![image alt text](/images/Management/Penctl_Userspace.png)
+![image alt text](/images/Management/NetApp_Userguide/Penctl_Userspace.png)
 
 In the above diagram, IP1 = 1.0.0.1 and IP2 = 1.0.0.2.
 
