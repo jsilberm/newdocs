@@ -439,16 +439,18 @@ To retrieve the response in Tabular format tmagent log from Naples:
 
 **# penctl show logs -m tmagent -j -i tun0**
 
-	[{  
-		"level": "info",  
-		"ts": "1970-01-01T00:00:02.911603803Z",  
-		"module": "pen-tmagent",  
-		"caller": "ipc.go:70",  
-		"pid": "701",  
-		"msg": "size of ma: 196608, specified: 196608"  
+	[
+		{  
+			"level": "info",  
+			"ts": "1970-01-01T00:00:02.911603803Z",  
+			"module": "pen-tmagent",  
+			"caller": "ipc.go:70",  
+			"pid": "701",  
+			"msg": "size of ma: 196608, specified: 196608"  
 		}, {  
-		...  
-	}]  
+			...  
+		}
+	]  
 
 YAML Formatted (-y)
 -------------------
