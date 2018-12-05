@@ -107,7 +107,8 @@ Installation of the Naples adapter card requires following standard safety proce
 
 4. It is strongly recommended to use an ESD strap shown on a picture below or other antistatic devices. 
 
-![Screw Driver](/images/Management/NetApp_Userguide/Screw_Driver.png)![ESD Protection](/images/Management/ESD_Protection.png)  
+![Screw Driver](/images/Management/NetApp_Userguide/Screw_Driver.png)
+![ESD Protection](/images/Management/NetApp_Userguide/ESD_Protection.png)  
 
 To successfully install the card,  double check the following: 
 
