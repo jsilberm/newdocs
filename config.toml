@@ -38,7 +38,7 @@ enableMissingTranslationPlaceholders = false
 
     # path name excluded from documentation menu
     menu_exclusion = ["archives", "blog", "entry", "post", "posts"]
-
+   
 
 anchor = "smart"
 
