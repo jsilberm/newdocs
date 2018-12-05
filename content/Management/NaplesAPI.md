@@ -11,13 +11,17 @@ draft: false
 toc: false
 ---
 
-![Pensando Logo](/images/Management/Pensando_Logo.png)
+![Pensando Logo](/images/Management/Naples/Pensando_Logo.png)
 
 
 NAPLES REST API Reference Guide
 ===============================
 
-Version 0.1.0
+
+Version: 0.1.1
+
+Date: Dec 5, 2018
+
 
 
 Legal Stuff
@@ -33,7 +37,6 @@ Known limitations and features not yet implemented:
 
 *The NAPLES REST API is currently in an early stage of development (ALPHA), features that has not been implemented yet are not covered in this documentation. This document is subject to change.*
 
--   Not full CRUD support, only POST and GET
 -   API Versioning is not implemented in URI
 -   Authentication and Session Cookies, currently calls are
     accepted
@@ -42,9 +45,7 @@ Known limitations and features not yet implemented:
     all objects of a certain kind, but you can not reference a specific
     object as an end-point one from the list) is currently not
     implemented
--   Granular error codes are not implemented. Successful response
-    returns a 200 and Bad requests and any errors return 500 with a
-    meaningful error message set
+
 
 Pensando REST Overview
 ======================
@@ -64,7 +65,7 @@ Venice is a separate software and is not coverd in this document. When Venice is
 The REST Clients should instead send their REST requests to the
 Venice management system. 
 
-![Naples vs Venice](/images/Management/Naples_vs_Venice.png)
+![Naples vs Venice](/images/Management/Naples/Naples_vs_Venice.png)
 
 
 Please note that the Venice REST API is similar to NAPLES REST API, but they are not identical, please read the
@@ -89,9 +90,10 @@ Our design goals for the API was to create a modern, simple programmatic interfa
 -   REST Semantics
 -   HTTP
 -   Default TCP port: 9007\*
--   HTTP operations POST, GET
+-   HTTP operations POST, PUT, GET and Delete
 -   JSON object structure in payload
 -   Multi-tenant enabled
+-   Multi-namespace enabled
 -   Uniformed object definition
 -   API is declarative and operations are idempotent
 
@@ -134,8 +136,9 @@ The Pensando REST API uses the following HTTP methods to perform Create, Read op
 | HTTP Method           | Operation      | Description                 |
 |-----------------------|----------------|-----------------------------|
 | POST                  | Create         | Create a new object         |
+| PUT                   | Update         | Modify an existing object   |
 | GET                   | Read           | Returns one or more objects |
-
+| DELETE                | Delete.        | Delete one or more objects  |
 
 
 HTTP Response Messages
@@ -151,7 +154,7 @@ Each call receives a response message that indicates the success of the call, be
 | Status-Code                | Description / Status Key in JSON |
 |----------------------------|----------------------------------|
 | 200                        | OK\*                             |
-| 500                        | Internal Server Error            |
+| 500                        | Error.                           |
 | 404                        | URI not found                    |
 
 \*A successful JSON responses do not contain the return code, see below success vs failure responses.
@@ -167,26 +170,23 @@ JSON Request Payload
 
 Below is an example of a payload to create an VXLAN tunnel (Tunnel object) called “infra\_vxlan\_tunnel” in the tenant called “default” and in the namespace “infra”, you can think of the namespace as a virtual routing and forwarding (VRF) technology. 
 
+	{  
+		"kind": "Tunnel",  
+		"meta": {. 
+		"namespace": "infra",  
+		"name": "infra\_vxlan\_tunnel",  
+		"tenant": "default". 
+	},  
+		"spec": {  
+			"admin-status": "UP",  
+			"destination": "192.168.10.11",  
+			"type": "VXLAN",  
+			"source": "192.168.10.12". 
+		}  
+	}
 
-{  
- "kind": "Tunnel",  
- "meta": {. 
-  "namespace": "infra",  
-  "name": "infra\_vxlan\_tunnel",  
-  "tenant": "default". 
- },  
- "spec": {  
-  "admin-status": "UP",  
-  "destination": "192.168.10.11",  
-  "type": "VXLAN",  
-  "source": "192.168.10.12". 
- }  
-}
 
-
-In this example, the HTTP method would be a POST operation, and the URI would be: 
-http://10.10.10.10:9007/api/tunnels/default/infra
-
+In this example, the HTTP method would be a POST operation, and the URI would be: http://10.10.10.10:9007/api/tunnels/default/infra  
 (Example assumes NAPLES has IP address of: 10.10.10.10)
 
 
@@ -198,56 +198,59 @@ endpoint “public-router” described above.
 
 **Example of a POST Successful response:**
 
-{  
-   "status-code": 200,  
-   "error": "",  
-   "self-link": "/api/tunnels/default/infra/infra\_vxlan\_tunnel"  
-}
+	{  
+		"status-code": 200,  
+		"error": "",  
+		"self-link": "/api/tunnels/default/infra/infra\_vxlan\_tunnel"  
+	}
 
 
 
 **Example of a POST Failure (Error) response:**
 
-{  
-   "status-code": 500,  
-   "error": "tunnel already exists",  
-   "self-link": ""  
-}
+	{  
+		"status-code": 500,  
+		"error": "tunnel already exists",  
+		"self-link": ""  
+	}
 
 **Example of a GET Failure (Error) of an non existent object query:**
 
-{  
-   "status-code": 500,  
-   "error": "endpoint not found",  
-   "self-link": ""  
-}
+	{  
+		"status-code": 500,  
+		"error": "endpoint not found",  
+		"self-link": ""  
+	}
 
 
 Object Structure and Definition
 ===============================
 
-The NAPLES object model is inspired by K8s where user specifies the intent, operations are idempotent, status describes what is
+The NAPLES object model is an user specified intent, operations are idempotent, status describes what is
 real.
 
-**Kind:** aka type of the object 
+	kind:          Aka type of the object 
+	meta:          Object metadata (common to all objects, all fields are optional) 
+		name:      String name of the object (user provided unique string for this kind of object) 
+		tenant:    Tenant name of the object (optional) 
+		namespace: Namespance within a Tennant, works like a virtual routing and forwarding (VRF) technology
+	... 
+	Spec:          Object Specific Schema 
+	...
+	Status:        Object Specific Status Schema 
+	... 
 
-**Meta:** object metadata (common to all objects, all fields are optional) 
+For Example:
 
-**Name:** string name of the object (user provided unique string for this kind of object) 
-
-**Tenant:** tenant name of the object (optional) 
-
-... 
-
-**Spec:** Object Specific Schema 
-
-...
-
-**Status:** Object Specific Status Schema 
-
-... 
-
-![Single Object](/images/Management/Single_Object.png)
+	kind: Network
+	meta:
+		name: corp-network-208
+		tenant: default
+		namespace: copr-network-208
+	Spec:
+		ipv4-subnet: 10.1.1.208/24
+		ipv4-gateway: 10.1.1.1
+		vlan-id: 208
 
 
 Object Relationships
@@ -257,7 +260,7 @@ Objects can express relationships in the model, by Named Reference, below is an 
 
 **Named Reference:**
 
-![Named Reference](/images/Management/Named_Reference.png)
+![Named Reference](/images/Management/Naples/Named_Reference.png)
 
 
 Object “public-router” references a Network object by its name “public”
@@ -289,62 +292,63 @@ Successful response:
 **Headers** (Nothing of relevance for the REST API)
 
 **Body:**
-[  
-    {  
-        "kind": "Namespace",  
-        "meta": {  
-            "name": "infra",  
-            "tenant": "default",  
-            "creation-time": "2018-06-25T20:15:59.27625614Z",  
-            "mod-time": "2018-06-25T20:15:59.27625614Z". 
-        },  
-        "spec": {. 
-            "namespace-type": "INFRA"  
-        },  
-        "status": {  
-            "namespace-id": 3. 
-        }  
-    },  
-    {  
-        "kind": "Namespace",  
-        "meta": {  
-            "name": "kg1",  
-            "tenant": "default",  
-            "creation-time": "2018-06-25T20:18:55.282017114Z",  
-            "mod-time": "2018-06-25T20:18:55.282017114Z"  
-        },  
-        "spec": {},  
-        "status": {  
-            "namespace-id": 4  
-        }  
-    },  
-    {  
-        "kind": "Namespace",  
-        "meta": {  
-            "name": "public",  
-            "tenant": "default",  
-            "creation-time": "2018-06-25T20:18:55.422266812Z",  
-            "mod-time": "2018-06-25T20:18:55.422266812Z"  
-        },  
-        "spec": {},  
-        "status": {  
-            "namespace-id": 5  
-        }  
-    },  
-    {  
-        "kind": "Namespace",  
-        "meta": {  
-            "name": "default",  
-            "tenant": "default",  
-            "creation-time": "2018-06-25T20:15:59.191280753Z",  
-            "mod-time": "2018-06-25T20:15:59.191280753Z"  
-        },  
-        "spec": {},  
-        "status": {  
-            "namespace-id": 2  
-        }  
-    }  
-]  
+
+	[
+		{
+			"kind": "Namespace",
+			"meta": {
+				"name": "infra",
+				"tenant": "default",
+				"creation-time": "2018-06-25T20:15:59.27625614Z",
+				"mod-time": "2018-06-25T20:15:59.27625614Z".
+			},
+			"spec": {.
+				"namespace-type": "INFRA"
+			},
+			"status": {
+				"namespace-id": 3.
+			}
+		},
+		{
+			"kind": "Namespace",
+			"meta": {
+				"name": "kg1",
+				"tenant": "default",
+				"creation-time": "2018-06-25T20:18:55.282017114Z",
+				"mod-time": "2018-06-25T20:18:55.282017114Z"
+			},
+			"spec": {},
+			"status": {
+				"namespace-id": 4
+			}
+		},
+		{
+			"kind": "Namespace",
+			"meta": {
+				"name": "public",
+				"tenant": "default",
+				"creation-time": "2018-06-25T20:18:55.422266812Z",
+				"mod-time": "2018-06-25T20:18:55.422266812Z"
+			},
+			"spec": {},
+			"status": {
+				"namespace-id": 5
+			}
+		},
+		{
+			"kind": "Namespace",
+			"meta": {
+				"name": "default",
+				"tenant": "default",
+				"creation-time": "2018-06-25T20:15:59.191280753Z",
+				"mod-time": "2018-06-25T20:15:59.191280753Z"
+			},
+			"spec": {},
+			"status": {
+				"namespace-id": 2
+			}
+		}
+	] 
 
 In this example, NAPLES returned four Namespace objects, “infra”, “kg1”, “public” and “default” in the body.
 
@@ -377,7 +381,7 @@ You can use the curl tool to send and receive REST calls from the CLI of a clien
 
 (Don’t forget to change the IP Address, in the “default” tenant)
 
-\$ curl -X POST -H "Content-Type: application/json" -d '{"kind":"Namespace","meta":{"name":"**myName**","tenant":"**default**"}}' http://**10.10.10.10**:9007{.c9}/api/namespaces/
+**\$ curl -X POST -H "Content-Type: application/json" -d '{"kind":"Namespace","meta":{"name":"**myName**","tenant":"**default**"}}' http://**10.10.10.10**:9007{.c9}/api/namespaces/**
 
 Above example creates a Namespace object with the name “myName” 
 
@@ -385,11 +389,11 @@ List all defined Namespace objects example (GET):
 
 (Don’t forget to change the IP Address)
 
-\$ curl -H "Content-Type: application/json" http://**10.10.10.10**:9007/api/namespaces/
+**\$ curl -H "Content-Type: application/json" http://**10.10.10.10**:9007/api/namespaces/**
 
 To get more information about curl, please use the manpages:
 
-\$ man curl{}
+\$ man curl
 
 
 Using the Postman/Newman tool:
@@ -401,12 +405,12 @@ The tools have many features, one of them allows you to define a collection of m
 
 **Newman CLI example:**
 
-\$ newman run mycollection.json
+**\$ newman run mycollection.json**
 
 
-**Postman GUI, View:**
+Postman GUI, View:
 
-![Postman GUI](/images/Management/Postman_GUI.png)
+![Postman GUI](/images/Management/Naples/Postman_GUI.png)
 
 
 To get more details and information about the postman/Newman, please read the official documentation:
@@ -419,3 +423,4 @@ Troubleshooting
 API/Object Model documentation
 ==============================
 
+![Postman GUI](/images/Management/Naples/Naples_ObjectModel.png)
