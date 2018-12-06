@@ -4,11 +4,11 @@ linktitle: NetApp Katana User Guide
 description: NetApp Katana User Guide
 menu:
   docs:
-    parent: "Management"
+    parent: "management"
     weight: 1
 weight: 1
 draft: false
-toc: false
+toc: true
 ---
 NetApp Katana Pensando User Guide
 =================================

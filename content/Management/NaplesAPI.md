@@ -4,11 +4,11 @@ linktitle: Naples REST API Getting Started
 description: Naples REST API Getting Started
 menu:
   docs:
-    parent: "Management"
+    parent: "management"
     weight: 1
 weight: 1
 draft: false
-toc: false
+toc: true
 ---
 
 ![Pensando Logo](/images/Management/Naples/Pensando_Logo.png)
