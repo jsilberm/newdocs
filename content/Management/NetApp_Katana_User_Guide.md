@@ -590,6 +590,7 @@ The install process uploads the new firmware to the location that is not current
 3. Run the **penctl** command to upload the firmware:  
 
 **\# cd ~  **
+
 **\# penctl system firmware-install -f ./Naples100_v0.2-1559-gd08a1d9.tar -e tun0**
 
 Output should be similar to:
