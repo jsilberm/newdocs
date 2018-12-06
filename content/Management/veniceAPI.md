@@ -4,11 +4,11 @@ linktitle: Venice REST API Getting Started
 description: Venice REST API Getting Started
 menu:
   docs:
-    parent: "Management"
+    parent: "management"
     weight: 1
 weight: 1
 draft: false
-toc: false
+toc: true
 ---
 
 

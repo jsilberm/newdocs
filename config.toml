@@ -3,8 +3,8 @@ baseURL = "https://docs.pensando.io"
 languageCode = "en-us"
 DefaultContentLanguage = "en"
 title = "Pensando Docs"
-theme = "hugo-theme-techdoc"
-# theme = "gohugoioTheme"
+# theme = "hugo-theme-techdoc"
+theme = "gohugoioTheme"
 # theme = "hugo-theme-docdock"
 
 hasCJKLanguage = true
@@ -50,24 +50,23 @@ anchor = "smart"
 # Global menu section
 # High level items
 
-[[menu.main]]
+[[menu.docs]]
   name = "Hardware"
   weight = 1
-  identifier = "Hardware"
-  url = "/Hardware/"
+  identifier = "hardware"
+  url = "/hardware/"
 
-
-[[menu.main]]
+[[menu.docs]]
   name = "Drivers"
   weight = 2
-  identifier = "Drivers"
+  identifier = "drivers"
   post = "break"
-  url = "/Drivers/"
+  url = "/drivers/"
 
-[[menu.main]]
+[[menu.docs]]
   name = "Management"
-  identifier = "Management"
+  identifier = "management"
   weight = 3
   post = "break"
-  url = "/Management/"
+  url = "/management/"
 

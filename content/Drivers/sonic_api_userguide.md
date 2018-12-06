@@ -2,14 +2,15 @@
 title: Sonic API Programmer's Guide
 linktitle: Sonic API Programmer's Guide
 description: Sonic API Programmer's Guide
-categories: [Drivers]
 menu:
   docs:
-    parent: "Drivers"
-    weight: 1
+    parent: "drivers"
+    weight: 2
+quicklinks:
 weight: 1
 draft: false
 toc: true
+layout: documentation-home
 ---
 
 # Legal
