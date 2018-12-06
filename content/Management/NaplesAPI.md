@@ -265,31 +265,34 @@ Objects can express relationships in the model, by Named Reference, below is an 
 
 Object “public-router” references a Network object by its name “public”
 
+API/Object Model documentation
+==============================
 
-Query and objects, Example
-==========================
+![Postman GUI](/images/Management/Naples/Naples_ObjectModel.png)
+
+
+Examples
+========
 
 
 Authentication and Session Handling
 -----------------------------------
+Currently the REST API is only available to the host and not on to visibile to any external network, there is therefor no need for authentication.
 
 To query for all defined namespace objects in the NAPLES:
 
-
 **GET:** HTTP://10.10.10.10:9007/api/namespaces
-
-
 
 **Header:**
 
 Content-Type: application/json
 
-Successful response:
---------------------
+**Response Message:**
 
-**HTTP Response code:** 200 OK
+HTTP Response code: 200 OK
 
-**Headers** (Nothing of relevance for the REST API)
+**Headers:**  
+(Nothing of relevance for the REST API)
 
 **Body:**
 
@@ -353,6 +356,130 @@ Successful response:
 In this example, NAPLES returned four Namespace objects, “infra”, “kg1”, “public” and “default” in the body.
 
 
+Security Group Policy (SGPolicy) Example
+========================================
+
+In this example there will be 2 servers (Server1 IP: 11.0.0.10, and Server2 IP: 11.0.0.20) connected to the VLAN (200).
+The example assumes **'memtun'** is running, and **'tun0'** is present and available on **'1.0.0.1'** and that Naples management interface has been configured on **'1.0.0.2'**, on both Server1 and Server2.
+
+![Postman GUI](/images/Management/Naples/2Servers_Microsegmentation.png)
+
+Example Scenario:
+-----------------
+
+We want to open a one way TCP port(22) from server1 to Server2, to do this we need to have do some  configuration on each server:
+
+**Server1 and Server2:**  
+- Define an L2 Segment, VLAN 200)  
+- Define an interface endpoint for server1  
+- Define an interface endpoint for server2  
+- Define a Security Group Policy (SGPolicy) to allow all outgoing traffic to any server*
+
+**\*Please note:**  
+_In this exampe we will configure the Naples on the servers to allow all outgoing traffic to any server, but for more secure environmnets you should create polices to specifically specify which port's and to which server's, and traffic direction allowed._
+
+
+**Server2:**  
+- Define a Security Group Policy (to allow incoming TCP connects on port 22)  
+
+Creating the VLAN 200 L2 Segment:
+---------------------------------
+To create the network we will send the **'Network'** policy to Naples:
+
+	kind: Network
+	meta:
+		name: corp-network-200
+		tenant: default
+		namespace: lab
+	Spec:
+		vlan-id: 200
+
+**Run the following command on both Server1 and Server2:**
+
+\# curl -d '\{ "kind": "Network", "meta": \{ "name": "corp-network-200", "tenant": "default", "namespace": "lab"\}, "spec": \{ "vlan\-id": 200 }}' \-X POST \-H "Content-Type:application/json" http://1.0.0.2:9007/api/networks/
+
+Define an interface endpoint for Server1:
+-----------------------------------------
+
+To create server1 endpoint, we need to create the **'Endpoint'** policy: 
+
+	kind: Endpoint
+	meta:
+		name: srv1-interface1
+		tenant: default
+		namespace: lab
+	Spec:
+		network-name: corp-network-200
+		ipv-address: 11.0.0.10/24
+		mac-address: 00:ae:cd:00:10
+		useg-vlan: 1000
+
+**Run the following command on both Server1 and Server2:**
+
+\# curl -d '{ "kind": "Endpoint", "meta": { "name": "srv1-interface1", "tenant": "default", "namespace": "lab"}, "spec": { "network-name": "corp-network-200", "ipv4-address": "11.0.0.10/32", "mac-address": "00:ae:cd:00:10", "useg-vlan": 1000}}' -X POST -H "Content-Type:application/json" http://1.0.0.2:9007/api/endpoints/
+
+Define an interface endpoint for Server2:
+-----------------------------------------
+
+To create server2 endpoint, we need to create the **'Endpoint'** policy: 
+
+	kind: Endpoint
+	meta:
+		name: srv2-interface1
+		tenant: default
+		namespace: lab
+	Spec:
+		network-name: corp-network-200
+		ipv-address: 11.0.0.20/24
+		mac-address: 00:ae:cd:00:20
+		useg-vlan: 1001
+
+**Run the following command on both Server1 and Server2:**
+
+\# curl -d '{ "kind": "Endpoint", "meta": { "name": "srv2-interface1", "tenant": "default", "namespace": "lab"}, "spec": { "network-name": "corp-network-200", "ipv4-address": "11.0.0.20/32", "mac-address": "00:ae:cd:00:20", "useg-vlan": 1001}}' -X POST -H "Content-Type:application/json" http://1.0.0.2:9007/api/endpoints/
+
+Define a SGPolicy on Server1 and Server2 to allow all outgoing traffic:
+---------------------------------------------------------------------------
+# NEED HELP WITH THIS!!!
+# NEED HELP WITH THIS!!!
+# NEED HELP WITH THIS!!!
+
+To allow all out going traffic, we need to create an **'SGPolicy'** policy:
+
+	kind: SGPolicy
+	meta:
+		name: allow-tcp-22
+		tenant: default
+		namespace: lab
+	Spec:
+		network-name: corp-network-200
+
+
+**Run the following command on Server2:**
+
+curl -d '{"kind": "SGPolicy", "meta": {"name": "allow-tcp-22", "tenant": "default", "namespace": "lab"}, "spec": {"attach-tenant": true, "policy-rules": [{"action": "PERMIT", "destination": {"addresses": ["11.0.0.10"], "app-configs": [{"protocol": "tcp", "port": "22"}]}}]}}' -X POST -H "Content-Type:application/json" http://1.0.0.2:9007/api/security/policies/
+
+Define a Security Group Policy on Server2:
+------------------------------------------
+
+To open the TCP port, we need to create the **'SGPolicy'** policy:
+
+	kind: SGPolicy
+	meta:
+		name: allow-tcp-22
+		tenant: default
+		namespace: lab
+	Spec:
+		network-name: corp-network-200
+
+
+**Run the following command on Server2:**
+
+curl -d '{"kind": "SGPolicy", "meta": {"name": "allow-tcp-22", "tenant": "default", "namespace": "lab"}, "spec": {"attach-tenant": true, "policy-rules": [{"action": "PERMIT", "destination": {"addresses": ["11.0.0.10"], "app-configs": [{"protocol": "tcp", "port": "22"}]}}]}}' -X POST -H "Content-Type:application/json" http://1.0.0.2:9007/api/security/policies/
+
+The configuration is now complete, and Server1 can now access Server2 via TCP on port 22
+
+
 Misc
 ====
 
@@ -381,7 +508,7 @@ You can use the curl tool to send and receive REST calls from the CLI of a clien
 
 (Don’t forget to change the IP Address, in the “default” tenant)
 
-**\$ curl -X POST -H "Content-Type: application/json" -d '{"kind":"Namespace","meta":{"name":"**myName**","tenant":"**default**"}}' http://**10.10.10.10**:9007{.c9}/api/namespaces/**
+**$ curl -X POST -H "Content-Type: application/json" -d '{"kind":"Namespace","meta":{"name":"**myName**","tenant":"**default**"}}' http://**10.10.10.10**:9007{.c9}/api/namespaces/**
 
 Above example creates a Namespace object with the name “myName” 
 
@@ -389,11 +516,11 @@ List all defined Namespace objects example (GET):
 
 (Don’t forget to change the IP Address)
 
-**\$ curl -H "Content-Type: application/json" http://**10.10.10.10**:9007/api/namespaces/**
+**$ curl -H "Content-Type: application/json" http://**10.10.10.10**:9007/api/namespaces/**
 
 To get more information about curl, please use the manpages:
 
-\$ man curl
+**$ man curl**
 
 
 Using the Postman/Newman tool:
@@ -405,7 +532,7 @@ The tools have many features, one of them allows you to define a collection of m
 
 **Newman CLI example:**
 
-**\$ newman run mycollection.json**
+**$ newman run mycollection.json**
 
 
 Postman GUI, View:
@@ -420,7 +547,3 @@ To get more details and information about the postman/Newman, please read the of
 Troubleshooting
 ===============
 
-API/Object Model documentation
-==============================
-
-![Postman GUI](/images/Management/Naples/Naples_ObjectModel.png)
