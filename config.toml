@@ -65,9 +65,16 @@ anchor = "smart"
   url = "/drivers/"
 
 [[menu.docs]]
-  name = "Management"
-  identifier = "management"
+  name = "Naples REST API"
+  identifier = "NaplesAPI"
   weight = 3
   post = "break"
-  url = "/management/"
+  url = "/naples"
+
+[[menu.docs]]
+  name = "Venice REST API"
+  identifier = "VeniceAPI"
+  weight = 4
+  post = "break"
+  url = "/venice"
 
