@@ -5,7 +5,7 @@ description: Naples REST API Getting Started
 menu:
   docs:
     parent: "management"
-    weight: 1
+    weight: 2
 weight: 1
 draft: false
 toc: true
@@ -260,8 +260,8 @@ Objects can express relationships in the model, by Named Reference, below is an 
 
 **Named Reference:**
 
-![Named Reference](/images/Management/Naples/Named_Reference.png)
 
+![Named Reference](/images/Management/Naples/Named_Reference.png )
 
 Object “public-router” references a Network object by its name “public”
 

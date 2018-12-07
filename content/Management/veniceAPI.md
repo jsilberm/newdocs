@@ -5,12 +5,11 @@ description: Venice REST API Getting Started
 menu:
   docs:
     parent: "management"
-    weight: 1
-weight: 1
+    weight: 3
+weight: 3
 draft: false
 toc: true
 ---
-
 
 ![](/images/Pensando.png)
 

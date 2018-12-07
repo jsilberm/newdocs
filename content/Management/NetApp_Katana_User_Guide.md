@@ -5,13 +5,11 @@ description: NetApp Katana User Guide
 menu:
   docs:
     parent: "management"
-    weight: 1
-weight: 1
+    weight: 2
+weight: 2
 draft: false
 toc: true
 ---
-NetApp Katana Pensando User Guide
-=================================
 
 Version:  0.1.1
 
@@ -20,8 +18,6 @@ Date:      Dec 5, 2018
 ![image alt text](/images/Management/NetApp_Userguide/Pensando_Logo.png)
 
 ![image alt text](/images/Management/NetApp_Userguide/NetApp_Logo.png)
-
-[[TOC]]
 
 1 Pensando Legal Note
 =====================

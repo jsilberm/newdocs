@@ -54,6 +54,7 @@ anchor = "smart"
   name = "Hardware"
   weight = 1
   identifier = "hardware"
+  post = "break"
   url = "/hardware/"
 
 [[menu.docs]]

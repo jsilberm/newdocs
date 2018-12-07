@@ -10,7 +10,6 @@ quicklinks:
 weight: 1
 draft: false
 toc: true
-layout: documentation-home
 ---
 
 # Legal

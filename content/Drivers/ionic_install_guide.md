@@ -1,3 +1,5 @@
+---
+title: IONIC Installation Guide
 description: IONIC Installation Guide
 menu:
   docs:
@@ -8,3 +10,5 @@ weight: 1
 draft: false
 toc: true
 ---
+
+IONIC Installation Guide

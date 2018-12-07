@@ -1,6 +1,6 @@
 ---
-title: Drivers Index
-linktitle: Pensando Drivers Index
+title: Pensando Drivers 
+linktitle: Pensando Drivers 
 description: Pensando Drivers
 date: 2017-02-01
 publishdate: 2017-02-01
@@ -14,4 +14,5 @@ categories: [drivers]
 weight: 01	#rem
 draft: false
 toc: true
+layout: documentation-home
 ---
