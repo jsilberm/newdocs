@@ -14,8 +14,7 @@ Website will be locally served at [http://localhost:1313/](http://localhost:1313
 # Or Run as a Container
 
 ```
- docker build -t pnsodocs .
- docker run -d -p 1313:1313 pnsodocs
+ make
 ```
 
 Website will be locally served at [http://localhost:1313/](http://localhost:1313/)
