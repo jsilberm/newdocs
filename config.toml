@@ -39,8 +39,21 @@ enableMissingTranslationPlaceholders = false
     # path name excluded from documentation menu
     menu_exclusion = ["archives", "blog", "entry", "post", "posts"]
    
+    [params.algolia]
+    vars = ["title", "summary", "date", "publishdate", "expirydate", "permalink"]
+    params = ["categories", "tags"]
 
-anchor = "smart"
+[outputFormats.Algolia]
+baseName = "algolia"
+isPlainText = true
+mediaType = "application/json"
+notAlternative = true
+
+[outputs]
+home = ["HTML", "RSS", "Algolia"]
+    
+
+# anchor = "smart"
 
 
 ## As of v0.20, all content files include a default "categories" value that's the same as the section. This was a cheap future-proofing method and should/could be changed accordingly.
@@ -65,16 +78,17 @@ anchor = "smart"
   url = "/drivers/"
 
 [[menu.docs]]
-  name = "Naples REST API"
-  identifier = "NaplesAPI"
+  name = "Management"
+  identifier = "management"
   weight = 3
   post = "break"
-  url = "/naples"
+  url = "/management/"
 
 [[menu.docs]]
-  name = "Venice REST API"
-  identifier = "VeniceAPI"
-  weight = 4
+  name = "Release Notes"
+  identifier = "release_notes"
+  weight = 3
   post = "break"
-  url = "/venice"
+  url = "/release_notes/"
+
 
