@@ -2,7 +2,7 @@ import styles from './../css/main.css';
 import './anchorforid.js'
 import './clipboardjs.js'
 import './codeblocks.js'
-import './docsearch.js'
+//import './docsearch.js'
 //import './hljs.js'
 import './lazysizes.js'
 import './menutoggle.js'
@@ -10,6 +10,8 @@ import './scrolldir.js'
 import './smoothscroll.js'
 import './tabs.js'
 import './nojs.js'
+import './academic.js'
+import './academic-search.js'
 
 
 
