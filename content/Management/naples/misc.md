@@ -3,7 +3,7 @@ title: Misc
 linktitle: Misc
 menu:
   docs:
-    parent: "NaplesAPI"
+    parent: "naples"
     weight: 6
 weight: 6
 draft: false

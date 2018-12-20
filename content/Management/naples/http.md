@@ -4,9 +4,9 @@ linktitle: Naples HTTP
 description: Naples HTTP
 menu:
   docs:
-    parent: "NaplesAPI"
+    parent: "naples"
     weight: 2
-weight: 1
+weight: 2
 draft: false
 toc: true
 ---

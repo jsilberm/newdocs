@@ -4,7 +4,7 @@ linktitle: Authentication
 description: Naples Authentication
 menu:
   docs:
-    parent: "NaplesAPI"
+    parent: "naples"
     weight: 4
 weight: 4
 draft: false

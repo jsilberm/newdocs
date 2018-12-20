@@ -4,7 +4,7 @@ linktitle: Naples Overview
 description: Naples Overview
 menu:
   docs:
-    parent: "NaplesAPI"
+    parent: "naples"
     weight: 1
 weight: 1
 draft: false

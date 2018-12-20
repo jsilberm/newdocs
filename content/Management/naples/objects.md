@@ -4,9 +4,9 @@ linktitle: Naples Objects
 description: Naples Objects
 menu:
   docs:
-    parent: "NaplesAPI"
+    parent: "naples"
     weight: 3
-weight: 1
+weight: 3
 draft: false
 toc: true
 ---

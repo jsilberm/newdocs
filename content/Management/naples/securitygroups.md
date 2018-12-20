@@ -3,7 +3,7 @@ title: Security Groups
 linktitle: Security Groups
 menu:
   docs:
-    parent: "NaplesAPI"
+    parent: "naples"
     weight: 5
 weight: 5
 draft: false
