@@ -4,8 +4,9 @@ languageCode = "en-us"
 DefaultContentLanguage = "en"
 title = "Pensando Docs"
 # theme = "hugo-theme-techdoc"
-theme = "gohugoioTheme"
+# theme = "gohugoioTheme"
 # theme = "hugo-theme-docdock"
+theme = "hugo-theme-learn"
 
 hasCJKLanguage = true
 metaDataFormat = "yaml"
