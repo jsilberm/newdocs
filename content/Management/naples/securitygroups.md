@@ -13,7 +13,7 @@ toc: true
 In this example there will be 2 servers (Server1 IP: 11.0.0.10, and Server2 IP: 11.0.0.20) connected to the VLAN (200).
 The example assumes **'memtun'** is running, and **'tun0'** is present and available on **'1.0.0.1'** and that Naples management interface has been configured on **'1.0.0.2'**, on both Server1 and Server2.
 
-![Postman GUI](/images/Management/Naples/2Servers_Microsegmentation.png)
+![Postman GUI](/images/management/naples/2Servers_Microsegmentation.png)
 
 Example Scenario:
 -----------------
@@ -188,7 +188,7 @@ The tools have many features, one of them allows you to define a collection of m
 
 Postman GUI, View:
 
-![Postman GUI](/images/Management/Naples/Postman_GUI.png)
+![Postman GUI](/images/management/naples/Postman_GUI.png)
 
 
 To get more details and information about the postman/Newman, please read the official documentation:

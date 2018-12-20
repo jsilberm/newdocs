@@ -51,7 +51,7 @@ These offload services can be chained and batched together as atomic operations,
 
 ### Block Diagram of the NAPLES Adapter, including all offload engines
 
-![image alt text](/images/Drivers/sonic/OffloadEngines.png)
+![image alt text](/images/drivers/sonic/OffloadEngines.png)
 
 ### Table of Offload Engine Algorithms, supported by the current SONIC driver
 
@@ -180,7 +180,7 @@ Host API is supported by P4 Programs and P4 DMA acting as an intermediary.
 
 P4+ programs are controlling the Storage Accelerator. See diagram below.
 
-![image alt text](/images/Drivers/sonic/HostAPI_arch.png)
+![image alt text](/images/drivers/sonic/HostAPI_arch.png)
 
 ## Service Requests
 
@@ -230,19 +230,19 @@ Batching is way to submit multiple requests with different service requests (Sin
 
 Below shows a single service compression request.
 
-![image alt text](/images/Drivers/sonic/NonBatchSingleServiceReq.png)
+![image alt text](/images/drivers/sonic/NonBatchSingleServiceReq.png)
 
 ## Non-Batched, Chained Service Request
 
 Below shows a chained request on a single data set that includes multiple different services (Compression, Hash and Encryption).
 
-![image alt text](/images/Drivers/sonic/NonBatchChainedServiceReq.png)
+![image alt text](/images/drivers/sonic/NonBatchChainedServiceReq.png)
 
 ## Batched, Multiple Service Requests
 
 Below shows three chained service requests that use multiple different offload services (Compression, Hash and Encryption) in various combinations. The batched request is considered complete once all processing of all service requests are completed.
 
-![image alt text](/images/Drivers/sonic/BatchMultipleServiceReq.png)
+![image alt text](/images/drivers/sonic/BatchMultipleServiceReq.png)
 
 ## Submitting and Processing the Request
 
@@ -252,7 +252,7 @@ There are three different ways which service requests can be submitted, dependin
 
 The **‘pnso_submit_request’** function will complete the request and return with the result.  The calling thread will wait synchronously for completion of the request. This request requires pointers to the request (*req) and response (*res) buffers.
 
-![image alt text](/images/Drivers/sonic/SynchNonBatchReq.png)
+![image alt text](/images/drivers/sonic/SynchNonBatchReq.png)
 
 <table>
   <tr>
@@ -276,7 +276,7 @@ Note: Caller thread is blocked until the response is returned.</td>
 The **‘pnso_add_to_batch’** and **‘pnso_flush_batch’ **functions will complete multiple batched requests and return with the batched result.  The calling thread will be waiting synchronously for the completion of all requests in the batch. Synchronous requests require pointers to the request (*req) and response (*res) buffers.
 
 
-![image alt text](/images/Drivers/sonic/SynchBatchReq.png)
+![image alt text](/images/drivers/sonic/SynchBatchReq.png)
 
 <table>
   <tr>
@@ -304,7 +304,7 @@ Note: Caller thread is blocked until the response is returned.</td>
 
 The **‘pnso_submit_request’** function returns immediately, and completes the request in the background before invoking a caller-provided callback function. In this request, pointers are provided for the request (*req) and response (*res) buffers, the callback function (cb_func) and callback context (*cb_ctx).  Once the request has been completed, the callback function will be invoked, indicating that the result is ready for processing. 
 
-![image alt text](/images/Drivers/sonic/ASynchNonBatchReq.png)
+![image alt text](/images/drivers/sonic/ASynchNonBatchReq.png)
 
 
 <table>
@@ -328,7 +328,7 @@ Note: Caller thread continues to execute.  The response is returned by a caller-
 
 The **‘pnso_add_to_batch’** and **‘pnso_flush_batch’** functions return immediately. In this request,  pointers are provided for the requests (*req) and response (*res) buffers, the callback function (cb_func) and callback context (*cb_ctx).  Once all the requests have been completed, the callback function will be invoked, indicating that the results are ready for processing. 
 
-![image alt text](/images/Drivers/sonic/ASynchBatchReq.png)
+![image alt text](/images/drivers/sonic/ASynchBatchReq.png)
 
 <table>
   <tr>
@@ -358,7 +358,7 @@ The **‘pnso_submit_request’** function returns immediately.  The request is 
 
 Please note: The callback function is called AFTER a successful poll check call, please see below:
 
-![image alt text](/images/Drivers/sonic/PollNonBatchReq.png)
+![image alt text](/images/drivers/sonic/PollNonBatchReq.png)
 
 <table>
   <tr>
@@ -389,7 +389,7 @@ The **‘pnso_add_to_batch’** and **‘pnso_flush_batch’** functions return 
 
 Please note: The callback function is called AFTER a successful poll check call.  Please see below:
 
-![image alt text](/images/Drivers/sonic/PollBatchReq.png)
+![image alt text](/images/drivers/sonic/PollBatchReq.png)
 
 <table>
   <tr>
@@ -462,11 +462,11 @@ struct pnso_buffer_list {
 
 Below is a visualization of the **‘flat_buffer’** and **‘buffer_list’** relationship:
 
-![image alt text](/images/Drivers/sonic/FlatBuffersSGL.png)
+![image alt text](/images/drivers/sonic/FlatBuffersSGL.png)
 
 The image below is an example of a buffer_list with 3 x flat_buffer’s pointing to 3 different physical memory addresses where the buffers (data) reside.
 
-![image alt text](/images/Drivers/sonic/SGLx3.png)
+![image alt text](/images/drivers/sonic/SGLx3.png)
 
 ## Initialization and Service Descriptors
 

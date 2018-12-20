@@ -12,7 +12,7 @@ toc: true
 ---
 
 
-![Postman GUI](/images/Management/Naples/Naples_ObjectModel.png)
+![Postman GUI](/images/management/naples/Naples_ObjectModel.png)
 
 
 Object Structure and Definition
@@ -53,6 +53,6 @@ Objects can express relationships in the model, by Named Reference, below is an 
 **Named Reference:**
 
 
-![Named Reference](/images/Management/Naples/Named_Reference.png )
+![Named Reference](/images/management/naples/Named_Reference.png )
 
 Object “public-router” references a Network object by its name “public”

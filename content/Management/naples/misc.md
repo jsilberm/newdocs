@@ -67,7 +67,7 @@ The tools have many features, one of them allows you to define a collection of m
 
 Postman GUI, View:
 
-![Postman GUI](/images/Management/Naples/Postman_GUI.png)
+![Postman GUI](/images/management/Naples/Postman_GUI.png)
 
 
 To get more details and information about the postman/Newman, please read the official documentation:
