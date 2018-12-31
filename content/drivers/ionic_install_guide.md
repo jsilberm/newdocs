@@ -1,6 +1,5 @@
 ---
-title: IONIC Manual for FreeBSD
-description: IONIC Manual for FreeBSD
+title: FreeBSD IONIC Manual for Katana
 menu:
   docs:
     parent: "drivers"
@@ -10,6 +9,8 @@ weight: 1
 draft: false
 toc: true
 ---
+
+# FreeBSD IONIC Manual 
 
 ## Introduction
 
@@ -69,7 +70,7 @@ WITH_OFED='yes'
 $ make -j 8  buildworld buildkernel installworld installkernel
 ```
 
-When complete, reboot and type `uname  -a` to verify.
+When complete, reboot and type ‘uname  -a’ to verify.
 
 ## Ethernet
 
@@ -103,6 +104,7 @@ ion0@pci0:96:0:0:       class=0x020000 card=0x40011dd8 chip=0x10021dd8 rev=0x00 
 ion1@pci0:97:0:0:       class=0x020000 card=0x40011dd8 chip=0x10021dd8 rev=0x00 hdr=0x00  << Network
 none135@pci0:98:0:0:    class=0xff0000 card=0x40011dd8 chip=0x10071dd8 rev=0x00 hdr=0x00 << Storage accelerator
 ```
+
 If system doesn’t list all the above devices, add the following line in **/boot/loader.conf** and reboot:
 
 
@@ -129,129 +131,40 @@ To load the **ionic** RDMA driver:
 
 ### Configure Network interface
 
-Configure and bring up the network interface.   Ex:
+Once the module is loaded and if ARI is disabled, you should see 3 network interfaces
 
 
 
 ```
- # ifconfig ionic0 10.1.1.1
+ionic0: flags=8802<BROADCAST,SIMPLEX,MULTICAST> metric 0 mtu 1500
+	options=e507bb<RXCSUM,TXCSUM,VLAN_MTU,VLAN_HWTAGGING,JUMBO_MTU,VLAN_HWCSUM,TSO4,TSO6,LRO,VLAN_HWFILTER,VLAN_HWTSO,RXCSUM_IPV6,TXCSUM_IPV6>
+	ether 00:ae:cd:00:01:3a
+	hwaddr 00:ae:cd:00:01:3a
+	nd6 options=29<PERFORMNUD,IFDISABLED,AUTO_LINKLOCAL>
+	media: Ethernet autoselect (100GBase-CR4 <full-duplex>)
+	status: active
+ionic1: flags=8802<BROADCAST,SIMPLEX,MULTICAST> metric 0 mtu 1500
+	options=e507bb<RXCSUM,TXCSUM,VLAN_MTU,VLAN_HWTAGGING,JUMBO_MTU,VLAN_HWCSUM,TSO4,TSO6,LRO,VLAN_HWFILTER,VLAN_HWTSO,RXCSUM_IPV6,TXCSUM_IPV6>
+	ether 00:ae:cd:00:01:3b
+	hwaddr 00:ae:cd:00:01:3b
+	nd6 options=29<PERFORMNUD,IFDISABLED,AUTO_LINKLOCAL>
+	media: Ethernet autoselect (100GBase-CR4 <full-duplex>)
+	status: active
+ionic2: flags=8802<BROADCAST,SIMPLEX,MULTICAST> metric 0 mtu 1500
+	options=e507bb<RXCSUM,TXCSUM,VLAN_MTU,VLAN_HWTAGGING,JUMBO_MTU,VLAN_HWCSUM,TSO4,TSO6,LRO,VLAN_HWFILTER,VLAN_HWTSO,RXCSUM_IPV6,TXCSUM_IPV6>
+	ether 00:ae:cd:00:01:3c
+	hwaddr 00:ae:cd:00:01:3c
+	nd6 options=29<PERFORMNUD,IFDISABLED,AUTO_LINKLOCAL>
+	media: Ethernet autoselect (1000Base-KX <full-duplex>)
+	status: active
 ```
 
-Verify the address is configured.  Ex:
-
-
-
-```
- # ifconfig ionic0
-ionic0: flags=8843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST> metric 0 mtu 1500
-       options=e507bb<RXCSUM,TXCSUM,VLAN_MTU,VLAN_HWTAGGING,JUMBO_MTU,VLAN_HWCSUM,TSO4,TSO6,LRO,VLAN_HWFILTER,VLAN_HWTSO,RXCSUM_IPV6,
-TXCSUM_IPV6>
-       ether 00:02:00:00:01:03
-       hwaddr 00:02:00:00:01:03
-       inet 10.1.1.1 netmask 0xff000000 broadcast 10.255.255.255  
-       nd6 options=29<PERFORMNUD,IFDISABLED,AUTO_LINKLOCAL>
-       media: Ethernet autoselect (100GBase-CR4 <full-duplex>)
-       status: active
-```
-
-### Basic ionic Test
-
-* Ping sanity test  
-
-
-```
-# ping 10.1.1.2
-PING 10.1.1.2 (10.1.1.2): 56 data bytes
-64 bytes from 10.1.1.2: icmp_seq=0 ttl=64 time=0.247 ms
-64 bytes from 10.1.1.2: icmp_seq=1 ttl=64 time=0.033 ms
-^C
---- 10.1.1.2 ping statistics ---
-2 packets transmitted, 2 packets received, 0.0% packet loss
-
-round-trip min/avg/max/stddev = 0.033/0.140/0.247/0.107 ms
-```
-### Performance ionic Test (iperf)
-
-*  **Start iperf3 server on other end**   
-
-
-```
-# ifconfig enp94s0f0
-enp94s0f0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
-       inet 10.1.1.2  netmask 255.0.0.0  broadcast 10.255.255.255
-       inet6 fe80::268a:7ff:fea5:2940  prefixlen 64  scopeid 0x20<link>
-       ether 24:8a:07:a5:29:40  txqueuelen 1000  (Ethernet)
-       RX packets 54046959744  bytes 76438965608198 (76.4 TB)
-       RX errors 0  dropped 125919  overruns 0  frame 0
-       TX packets 52827427998  bytes 78088427628680 (78.0 TB)
-       TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
-# iperf3 -s          
------------------------------------------------------------
-Server listening on 5201
------------------------------------------------------------
-```
-
-*  **Start iperf3 client from ionic, IP address 10.1.1.1. This will generate transmit side traffic.**   
-
-
-```
- # iperf3 -c 10.1.1.2 -i 1 -t 60
-Connecting to host 10.1.1.2, port 5201
-[  5] local 10.1.1.1 port 37457 connected to 10.1.1.2 port 5201
-[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec  2.79 GBytes  24.0 Gbits/sec    0    626 KBytes        
-[  5]   1.00-2.00   sec  2.95 GBytes  25.4 Gbits/sec    0    704 KBytes      
-```
-
-
-
-..
-
-*  **To stress Receive side, use -R which will create traffic in reverse flow.**   
-
-
-```
- # iperf3 -c 10.1.1.2 -i 1 -t 60 -R
-Connecting to host 10.1.1.2, port 5201
-Reverse mode, remote host 10.1.1.2 is sending
-[  5] local 10.1.1.1 port 61119 connected to 10.1.1.2 port 5201
-[ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec  2.52 GBytes  21.6 Gbits/sec                   
-[  5]   1.00-2.00   sec  2.47 GBytes  21.2 Gbits/sec
-```
-
-*  **Iperf3 also has option to generate JSON output using -J**   
-
-
-#### Iperf for UDP
-
-*  **Start iperf3 client from ionic, IP address 10.1.1.1. This will generate transmit side traffic.**   
-
-
-```
- # iperf3 -c 100.1.1.2 -i 1 -u -b 100G
-Connecting to host 100.1.1.2, port 5201
-[  5] local 100.1.1.1 port 10961 connected to 100.1.1.2 port 5201
-[ ID] Interval           Transfer     Bitrate         Total Datagrams
-[  5]   0.00-1.00   sec   501 MBytes  4.21 Gbits/sec  360096   
-[  5]   1.00-2.00   sec   503 MBytes  4.22 Gbits/sec  360907   
-[  5]   2.00-3.00   sec   502 MBytes  4.22 Gbits/sec  360889 
-```
-
-*  **Use -R to generate traffic in reverse direction.**   
-
-
-```
- # iperf3 -c 10.1.1.2 -i 1 -t 60 -R
-```
-
-
-
-Connecting to host 10.1.1.2, port 5201
+NB:  First two ports, **ionic0** and **ionic1** are 100G data ports. **ionic2** is mgmt interface to NIC and is used as the Management port by **_penctl_**
+.
 
 ## Collecting statistics
 
-*  **Run sysctl dev.ionic.0, it will provide very detailed statistics.**   
+*  **Statistics are available through "sysctl dev.ionic.0" and “sysctl dev.ionic1” for the respective ports, providing detailed statistics.   Ex:**   
 
 
 ```
@@ -280,7 +193,7 @@ dev.ionic.0.txq14.dma_map_error: 0
 dev.ionic.0.txq14.num_descs: 16384
 ```
 
-*  **In case you are interested in particular queue, say receive queue 0 stats, run:**   
+*  **To focus on a particular queue, (e.g. receive queue 0 stats), run:**   
 
 
 ```
@@ -316,7 +229,7 @@ dev.ionic.0.rxq0.tail: 2080
 dev.ionic.0.rxq0.head: 1953
 ```
 
-*  **Similarly for transmit side.**   
+*  **To focus on transmit queue 10:**   
 
 
 ```
@@ -346,22 +259,16 @@ dev.ionic.0.txq10.head: 0
 
 ### Change MTU size
 
-* To change the MTU size, run following  
+* Change the MTU size through "ifconfig".  Ex:  
 
 
 ```
 # ifconfig ionic0 mtu 1500
 ```
 
-* Verify by running ifconfig  
 
 
-```
-# ifconfig ionic0
-
-ionic0: flags=8843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST> metric 0 mtu 1500
-```
-### Enabling/disabling checksum, TSO and LRO
+### Enable/disable checksum, TSO and LRO through "ifconfig"
 
 Ex:
 
@@ -380,7 +287,7 @@ Ex:
 
 ### Changing number of queues
 
-Changing number of queues require reloading the ionic driver.
+Changing number of queues is done through "kenv" and requires reloading the ionic driver.  Ex:
 
 
 
@@ -409,15 +316,10 @@ hw.ionic.max_queues: 8 << Number of queues is 8 now.
 To change the ring size:
 
 * set hw.ionic.tx\_descs for Transmit side descriptors  
+* set hw.ionic.rx\_descs for Receive side descriptors  
 
 ```
 # kenv hw.ionic.tx_descs=16384
-```
-
-* set hw.ionic.rx\_descs for Receive side descriptors  
-
-
-```
 # kenv hw.ionic.rx_descs=16384
 ```
 
@@ -446,86 +348,3 @@ hw.ionic.max_queues: 16
 # kldunload ionic
 # kldload ionic.ko
 ```
-
-## RDMA/RoCEv2
-
-These steps pertain to building RDMA driver ("ionic\_rdma.ko").
-
-The ionic.ko module must be loaded before the ionic\_rdma.ko module.
-
-### FreeBSD Module Parameters
-
-These are rdma module parameters and descriptions:
-
-
-
-```
-compat.linuxkpi.ionic_rdma_max_gid: Max number GIDs.
-compat.linuxkpi.ionic_rdma_max_pd: Max number of PDs.
-compat.linuxkpi.ionic_rdma_rqcmb_order: Only alloc rq cmb less than order.
-compat.linuxkpi.ionic_rdma_rqcmb_sqcmb: Only alloc rq cmb if sq is cmb.
-compat.linuxkpi.ionic_rdma_sqcmb_order: Only alloc sq cmb less than order.
-compat.linuxkpi.ionic_rdma_sqcmb_inline: Only alloc sq cmb for inline data capability.
-compat.linuxkpi.ionic_rdma_work_budget: Max events to poll per round in work context.
-compat.linuxkpi.ionic_rdma_isr_budget: Max events to poll per round in isr context.
-compat.linuxkpi.ionic_rdma_eq_depth: Min depth for event queues.
-compat.linuxkpi.ionic_rdma_aq_depth: Min depth for admin queues.
-compat.linuxkpi.ionic_rdma_dbgfs_enable: Expose resource info in debugfs.
-compat.linuxkpi.ionic_rdma_dyndbg_enable: Print to dmesg for dev_dbg, et al.
-```
-
-Of the above parameters, the following can also be changed at runtime:
-
-
-
-```
-compat.linuxkpi.ionic_rdma_rqcmb_order: Only alloc rq cmb less than order.
-compat.linuxkpi.ionic_rdma_rqcmb_sqcmb: Only alloc rq cmb if sq is cmb.
-compat.linuxkpi.ionic_rdma_sqcmb_order: Only alloc sq cmb less than order.
-compat.linuxkpi.ionic_rdma_sqcmb_inline: Only alloc sq cmb for inline data capability.
-compat.linuxkpi.ionic_rdma_dyndbg_enable: Print to dmesg for dev_dbg, etc.
-```
-
-For user space, there is a corresponding libionic.so which is built by our build script.  For freebsd, applications should be built referencing this library as a dependency.  If not, this can be loaded by LD\_PRELOAD.  (FreeBSD)
-
-### Linux Module Parameters
-
-These are the module params and descriptions, from `modinfo ionic\_rdma.ko`:
-
-
-
-```
-parm:           dbgfs:Enable debugfs for this driver. (bool)
-parm:           aq_depth:Min depth for admin queues. (ushort)
-parm:           eq_depth:Min depth for event queues. (ushort)
-parm:           isr_budget:Max events to poll per round in isr context. (ushort)
-parm:           work_budget:Max events to poll per round in work context. (ushort)
-parm:           sqcmb_inline:Only alloc sq cmb for inline data capability. (bool)
-parm:           sqcmb_order:Only alloc sq cmb less than order. (int)
-parm:           rqcmb_sqcmb:Only alloc rq cmb if sq is cmb. (bool)
-parm:           rqcmb_order:Only alloc rq cmb less than order. (int)
-parm:           max_pd:Max number of PDs. (int)
-parm:           max_gid:Max number of GIDs. (int)
-```
-
-Of the above parameters, these can also be modified at runtime via sysfs:
-
-
-
-```
-/sys/module/ionic_rdma/parameters/sqcmb_inline
-/sys/module/ionic_rdma/parameters/sqcmb_order
-/sys/module/ionic_rdma/parameters/rqcmb_inline
-/sys/module/ionic_rdma/parameters/rqcmb_order
-```
-
-The metaparameter dyndbg and the file /sys/kernel/debug/dynamic\_debug/control can be used to control dynamic debugging to dmesg.
-
-For user space, libionic\_rdmav19.so is built with, and can be installed with rdma-core according to the build and install instructions of rdma-core.  We provide a copy of rdma-core with our driver added.  The version v19 comes from rdma-core, and changes with the rdma-core release cycle.
-
-RDMA device information:
-
-```
-ibv_devinfo [-v]
-```
-
