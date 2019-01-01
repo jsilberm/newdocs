@@ -121,14 +121,6 @@ Once the driver is built, you can load the **ionic** NIC/Ethernet driver:
 # kldload sys/modules/ionic/ionic.ko
 ```
 
-To load the **ionic** RDMA driver:
-
-
-
-```
-# kldload sys/modules/ionic_rdma/ionic_rdma.ko
-```
-
 ### Configure Network interface
 
 Once the module is loaded and if ARI is disabled, you should see 3 network interfaces
