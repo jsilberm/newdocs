@@ -163,7 +163,7 @@ The overall design is described in the following diagram, which allows the host 
 
 ![image alt text](/images/management/netapp_userguide/image_10.png)
 
-In the above diagram, IP1 = 169.254.0.1 and IP2 = 169.254.0.2
+In the above diagram, IP1 = 169.254.0.2 and IP2 = 169.254.0.1
 
 As seen above, **penctl** communicates with the Agent on Naples side using REST calls over IP connectivity. The IP address configuration on the Naples side is pre-defined, whereas the netdev’s interface IP is configured by using the commands specific to the host OS. In order to allow for IPs to not be colliding with some other IP used on the host-side, **penctl** establishes a separate network namespace on the host side.
 
