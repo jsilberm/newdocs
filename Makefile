@@ -1,14 +1,15 @@
 .PHONY:	all
-all:	latest 
+all:	docstarball
 
-.PHONY:	latest
-latest:	Dockerfile
+docs:  Dockerfile
 	docker build -t pnsodocs:latest .
-	docker save pnsodocs:latest | gzip > pnsodocs_docker.tar.gz
 	@echo
 	@echo "Please run:  docker run -d -p 1313:1313 pnsodocs"
 	@echo "Website will be locally served at http://localhost:1313"
 	@echo
+
+docstarball:	docs
+	docker save pnsodocs:latest | gzip > pnsodocs_docker.tar.gz
 
 clean:
 	docker rmi pnsodocs:latest
