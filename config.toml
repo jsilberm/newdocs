@@ -55,32 +55,3 @@ enableMissingTranslationPlaceholders = false
 # Global menu section
 # High level items
 
-[[menu.docs]]
-  name = "Hardware"
-  weight = 1
-  identifier = "hardware"
-  post = "break"
-  url = "/hardware/"
-
-[[menu.docs]]
-  name = "Drivers"
-  weight = 2
-  identifier = "drivers"
-  post = "break"
-  url = "/drivers/"
-
-[[menu.docs]]
-  name = "Management"
-  identifier = "management"
-  weight = 3
-  post = "break"
-  url = "/management/"
-
-[[menu.docs]]
-  name = "Release Notes"
-  identifier = "release_notes"
-  weight = 3
-  post = "break"
-  url = "/release_notes/"
-
-

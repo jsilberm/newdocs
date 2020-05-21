@@ -1,17 +1,10 @@
 ---
-title: Pensando Drivers 
-linktitle: Pensando Drivers 
-description: Pensando Drivers
-date: 2017-02-01
-publishdate: 2017-02-01
-lastmod: 2017-02-01
+title: Host OS Drivers 
+linktitle: Host OS Drivers 
+description: Host OS Drivers
 menu:
-  docs:
-    parent: "drivers"
-    weight: 1
-quicklinks:
+  main:
 categories: [drivers]
-weight: 01	#rem
 draft: false
 toc: true
 layout: documentation-home
