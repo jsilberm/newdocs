@@ -1,17 +1,17 @@
 [[docs]]
-  name = "PSM"
+  name = "Policy Services Manager"
   weight = 1
   identifier = "psm"
   url = "/psm/"
 
 [[docs]]
-  name = "DSC"
+  name = "Distributed Services Card"
   weight = 5
   identifier = "dsc"
   url = "/dsc/"
 
 [[docs]]
-  name = "Drivers"
+  name = "Host Drivers"
   weight = 15
   identifier = "drivers"
   post = "break"
