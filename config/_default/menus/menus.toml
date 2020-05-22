@@ -1,0 +1,28 @@
+[[docs]]
+  name = "PSM"
+  weight = 1
+  identifier = "psm"
+  url = "/psm/"
+
+[[docs]]
+  name = "DSC"
+  weight = 5
+  identifier = "dsc"
+  url = "/dsc/"
+
+[[docs]]
+  name = "Drivers"
+  weight = 15
+  identifier = "drivers"
+  post = "break"
+  url = "/drivers/"
+
+
+######## GLOBAL ITEMS TO BE SHARED WITH THE HUGO SITES
+
+  [[global]]
+    name = "Docs"
+    weight = 5
+    identifier = "docs"
+    url = "/documentation/"
+
