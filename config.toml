@@ -2,7 +2,7 @@ baseURL = "https://docs.pensando.io"
 
 languageCode = "en-us"
 DefaultContentLanguage = "en"
-title = "Pensando Docs"
+title = "Pensando Documentation"
 # theme = "hugo-theme-techdoc"
 theme = "gohugoioTheme"
 # theme = "hugo-theme-docdock"
@@ -39,8 +39,7 @@ enableMissingTranslationPlaceholders = false
     # Theme settings section
     dateformat = "" # default "2 Jan 2006"
 
-    # path name excluded from documentation menu
-    menu_exclusion = ["archives", "blog", "entry", "post", "posts"]
+    logo = "/images/pensando_logo.svg"
    
 [outputs]
   home = ["HTML", "JSON", "RSS"]

@@ -20,9 +20,4 @@
 
 ######## GLOBAL ITEMS TO BE SHARED WITH THE HUGO SITES
 
-  [[global]]
-    name = "Docs"
-    weight = 5
-    identifier = "docs"
-    url = "/documentation/"
 

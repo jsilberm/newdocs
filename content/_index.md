@@ -9,4 +9,3 @@ layout: documentation-home
 
 Welcome to Pensando Systems Documentation
 
-![](/images/pensando_logo.svg)
