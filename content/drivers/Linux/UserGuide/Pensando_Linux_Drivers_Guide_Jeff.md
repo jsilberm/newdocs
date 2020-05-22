@@ -2,6 +2,9 @@
 title: Linux Drivers Guide 
 description: Linux Drivers Guide 
 draft: false
+menu:
+  docs:
+    parent: "drivers"
 toc: true
 ---
 

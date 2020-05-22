@@ -1,12 +1,13 @@
 ---
-title: DSC25 User Guide 
-description: DSC Card User Guide 
+title: DSC-25 Card User Guide 
+description: Pensando DSC-25 Distributed Services Card User Guide For Enterprise Solutions
 weight: 1
+menu:
+  docs:
+    parent:  "dsc"
 draft: false
 toc: true
 ---
-
-# Pensando DSC-25 Distributed Services Card User Guide For Enterprise Solutions
 
 Date:      May 15th, 2020
 
@@ -16,11 +17,6 @@ Revision History
 |---------|-------------|------|
 | 1.0 | GA Release | May 2020 |
 
-Contents
-
-[[TOC]]
-
-# Pensando Distributed Services Card (DSC)
 
 # About this Manual
 
