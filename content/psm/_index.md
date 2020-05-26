@@ -1,11 +1,16 @@
 ---
 title: Policy and Services Manager (PSM)
-linktitle: Policy and Services Manager
+linktitle: Overview
 categories: [psm]
 menu:
-  main:
+  docs:
+    parent: psm
     weight: 1
 weight: 1
 draft: false
 toc: false
 ---
+
+The Pensando Policy and Services Manager (PSM) delivers central, lifecycle management, enterprise-grade security and unmatched visibility at every level of the software stack.
+
+The PSM exposes always-on telemetry and deep end-to-end observability, across the entire environment, integrating with popular analytics, orchestration and management tools via open API’s.

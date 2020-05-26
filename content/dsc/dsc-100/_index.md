@@ -1,10 +1,15 @@
 ---
 title: DSC-100
-description: DSC-100
+linktitle: DSC-100
+description: 
+menu:
+  dsc-100:
+    parent: dsc
+categories: [dsc]
 draft: false
 toc: true
-layout: documentation-home
-menu:
-  main:
-categories: [dsc]
+weight: -10
 ---
+
+Here are the User Guides and Release Notes for the DSC-100
+

@@ -20,4 +20,16 @@
 
 ######## GLOBAL ITEMS TO BE SHARED WITH THE HUGO SITES
 
+[[global]]
+    name = "Pensando Website"
+    weight = 1
+    identifier = "pensando_website"
+    post = "external"
+    url = "https://pensando.io/"
 
+  [[global]]
+    name = "Support"
+    weight = 5
+    identifier = "support"
+    post = "external"
+    url = "https://support.pensando.io/"
