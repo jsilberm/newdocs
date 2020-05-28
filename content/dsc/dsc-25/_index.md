@@ -3,7 +3,7 @@ title: DSC-25
 linktitle: DSC-25
 description: 
 menu:
-  dsc-25:
+  DSC-25:
     parent: dsc
 categories: [dsc]
 draft: false

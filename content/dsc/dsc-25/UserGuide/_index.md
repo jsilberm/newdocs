@@ -1,10 +1,10 @@
 ---
-title: DSC-25 Release Notes
-linktitle: DSC-25 Release Notes
+title: DSC-25 User Guide
+linktitle: DSC-25 User Guide
 description: 
 menu:
    DSC-25:
-      parent: dsc
+     parent: dsc
 categories: [dsc]
 draft: false
 toc: true

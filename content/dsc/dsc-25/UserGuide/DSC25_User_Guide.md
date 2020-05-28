@@ -1,9 +1,9 @@
 ---
 title: DSC-25 Card User Guide 
 description: Pensando DSC-25 Distributed Services Card User Guide For Enterprise Solutions
-# menu:
-#    docs:
-#       parent: dsc
+menu:
+    DSC-25:
+       parent: dsc
 weight: 1
 draft: false
 toc: true

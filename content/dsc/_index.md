@@ -1,10 +1,10 @@
 ---
 title: Distributed Services Cards (DSC)
-linktitle: Overview
+linktitle: DSC Overview
 description: DSC
 menu:
   docs:
-    parent: main
+    parent: dsc
 categories: [dsc]
 draft: false
 toc: true

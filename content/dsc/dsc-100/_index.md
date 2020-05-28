@@ -4,7 +4,6 @@ linktitle: DSC-100
 description: 
 menu:
   dsc-100:
-    parent: dsc
 categories: [dsc]
 draft: false
 toc: true
