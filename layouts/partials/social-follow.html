@@ -1,13 +1,11 @@
 {{ with .Site.Social.twitter }}
   <a href="https://twitter.com/intent/follow?screen_name={{ . }}" title="Follow on Twitter" class="link-transition twitter link dib z-999 pt3 pt0-l mr2">
-    {{ partial "svg/twitter.svg" (dict "size" "32px") }}
+    {{ partialCached "svg/twitter.svg" (dict "size" "32px") }}
   </a>
 {{ end }}
-<!--- TODO
 {{ with .Site.Social.linkedin }}
-  <a href="https://linkedin.com/company/{{ . }}" title="Follow on LinkedIn" class="link-transition linkedin link dib z-999 pt1 pt0-l mr2">
-    {{ partial "svg/linkedin.svg" (dict "size" ".000001px") }}
+  <a href="https://linkedin.com/company/{{ . }}" title="Follow on LinkedIn" class="link-transition twitter link dib z-999 pt3 pt0-l mr2">
+    {{ partialCached "svg/linkedin.svg" (dict "fill" "#01589B" "width" 30 "height" 30) }}
   </a>
 {{ end }}
--->
 
