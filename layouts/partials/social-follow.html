@@ -8,4 +8,9 @@
     {{ partialCached "svg/linkedin.svg" (dict "fill" "#01589B" "width" 30 "height" 30) }}
   </a>
 {{ end }}
+{{ with .Site.Social.youtube }}
+  <a href="https://youtube.com/channel/{{ . }}" title="Follow on YouTube" class="link-transition twitter link dib z-999 pt3 pt0-l mr2">
+    {{ partialCached "svg/YouTube.svg" (dict "fill" "#01589B" "width" 30 "height" 30) }}
+  </a>
+{{ end }}
 
