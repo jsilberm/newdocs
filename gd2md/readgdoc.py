@@ -57,6 +57,9 @@ import re
 #
 # ./readgdoc headless -i <Document ID> -b "/my_mount_2_dest/images" -d "/my_mount_2_dest" -r "./images"
 #
+# Example 3:
+# To scan the doc and get report only:
+# ./readgdoc scan -i <Document ID>
 #
 ###################################################################################################################################
 
