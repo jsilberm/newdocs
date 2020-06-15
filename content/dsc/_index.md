@@ -17,4 +17,3 @@ Distributed Service Cards come in several form Factors:
 * DSC-25 :  Generally for Enterprise customers
 * DSC-100:  Generally for Cloud customers
 
-

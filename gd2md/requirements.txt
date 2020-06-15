@@ -1,0 +1,8 @@
+Pillow
+lxml>=3.5.0
+google-auth-oauthlib
+selenium
+# chromedriver_installer
+google-api-python-client
+google-auth-httplib2
+BeautifulSoup4
