@@ -223,6 +223,8 @@ css_def = (
 def get_doc_meta(documentid):
     global doc_meta_dir
 
+    meta = False
+
     filename = doc_meta_dir + "/" + documentid + ".meta"
 
     if os.path.isfile(filename):
@@ -1236,7 +1238,9 @@ def main():
             verbose_print("urls_map['%s'] = '%s'" % (key, value))
 
     if 'meta_ignore' in args and args.meta_ignore == False:
-        doc_meta = get_doc_meta(DOCUMENT_ID)
+        doc_meta_result = get_doc_meta(DOCUMENT_ID)
+        if doc_meta_result != False:
+            doc_meta = doc_meta_result
 
     """Shows basic usage of the Docs API.
     Prints the title of a sample document.
