@@ -497,14 +497,14 @@ def dump_stats():
     count = 0
     for item in fonts_size_word:
         count += 1
-        print("      %s. %s" % (count, clean_string(item)))    
+        verbose_print("      %s. %s" % (count, clean_string(item)))    
 
     verbose_print("\nIncorrect words found:")
     verbose_print("----------------------")
     count = 0
     for item in words_list:
         count += 1
-        print("      %s. %s" % (count, clean_string(item))) 
+        verbose_print("      %s. %s" % (count, clean_string(item))) 
 
     verbose_print("\nFonts Size Statistics:")
     verbose_print("----------------------")
@@ -514,7 +514,7 @@ def dump_stats():
     total_images = image_stats['drawing'] + image_stats['bitmap']
     verbose_print("\nImage Statistics:")
     verbose_print("-----------------")    
-    verbose_print("# of Botmap Objects: %s" % image_stats['bitmap'])
+    verbose_print("# of Bitmap Objects: %s" % image_stats['bitmap'])
     verbose_print("# of Drawings Objects: %s" % image_stats['drawing'])
     verbose_print("# of Total images: %s" % total_images)
 

@@ -124,12 +124,26 @@ def parseDocument(url, username, pwdfile, download_path, headless, v_p):
     #Username/Email
     if headless:
         verbose_print("Working in HEADLESS mode...")
-        fld=site.find_elements_by_xpath("//input[@type='email' and @id='Email']")[0]
-        subm=site.find_elements_by_xpath("//input[@type='submit' and @id='next' and @name='signIn' ]")[0]
     else:
         verbose_print("Working in HEADFUL mode...")
-        fld=site.find_elements_by_xpath("//input[@type='email' and @id='identifierId']")[0]
-        subm=site.find_elements_by_xpath("//div[@role='button' and @id='identifierNext']")[0]
+
+    fld1=site.find_elements_by_xpath("//input[@type='email' and @id='Email']")
+    fld2=site.find_elements_by_xpath("//input[@type='email' and @id='identifierId']")
+    if len(fld1) > 0:
+        fld = fld1[0]
+    elif len(fld2) > 0:
+        fld = fld2[0]
+    else:
+        print("Error: Could not locate username field, exiting...", file=sys.stderr)
+
+    subm1=site.find_elements_by_xpath("//input[@type='submit' and @id='next' and @name='signIn' ]")
+    subm2=site.find_elements_by_xpath("//div[@role='button' and @id='identifierNext']")
+    if len(subm1) > 0:
+        subm = subm1[0]
+    elif len(subm2) > 0:
+        subm = subm2[0]
+    else:
+        print("Error: Could not locate username submit button, exiting...", file=sys.stderr)
 
     fld.send_keys(username)
 
@@ -143,13 +157,27 @@ def parseDocument(url, username, pwdfile, download_path, headless, v_p):
     subm.click()
     time.sleep(5)
 
+    html_return = site.page_source
+    site.save_screenshot(download_path + "/Password_Prompt.png")
+
     #Password
-    if headless and vp:
-        fld=site.find_elements_by_xpath("//input[@type='password' and @id='password']")[0]
-        subm=site.find_elements_by_xpath("//input[@type='submit' and @id='submit']")[0]
+    fld1=site.find_elements_by_xpath("//input[@type='password' and @id='password']")
+    fld2=site.find_elements_by_xpath("//input[@type='password' and @name='password']")
+    if len(fld1) > 0:
+        fld = fld1[0]
+    elif len(fld2) > 0:
+        fld = fld2[0]
     else:
-        fld=site.find_elements_by_xpath("//input[@type='password' and @name='password']")[0]
-        subm=site.find_elements_by_xpath("//div[@role='button' and @id='passwordNext']")[0]
+        print("Error: Could not locate password field, exiting...", file=sys.stderr)
+
+    subm1=site.find_elements_by_xpath("//input[@type='submit' and @id='submit']")
+    subm2=site.find_elements_by_xpath("//div[@role='button' and @id='passwordNext']")
+    if len(subm1) > 0:
+        subm = subm1[0]
+    elif len(subm2) > 0:
+        subm = subm2[0]
+    else:
+        print("Error: Could not locate password submit button, exiting...", file=sys.stderr)
 
     pwd = get_pwd(pwdfile)
     fld.send_keys(pwd)
