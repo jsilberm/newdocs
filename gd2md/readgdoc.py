@@ -808,7 +808,18 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
 
                 words_raw = raw_text.split()
                 words_content = text_content.split()
-                fonts_size_word.append("(Near: '" + raw_text + "') : (Font size changes in word: '" + words_raw[-1] + words_content[0] + "') : '<Size: " + font_sp + ">" + words_raw[-1] + "<Size: " + text_fs + ">" + words_content[0] + "'")
+
+                if len(words_raw) > 0:
+                    word_first_part = words_raw[-1]
+                else:
+                    word_first_part = ''
+
+                if len(words_content) > 0:
+                    word_last_part = words_content[0]
+                else:
+                    word_last_part = ''
+
+                fonts_size_word.append("(Near: '" + raw_text + "') : (Font size changes in word: '" + word_first_part + word_last_part + "') : '<Size: " + font_sp + ">" + word_first_part + "<Size: " + text_fs + ">" + word_last_part + "'")
 
 
     if font_size_prev != text_font_size:
@@ -830,7 +841,18 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
 
                 words_raw = raw_text.split()
                 words_content = text_content.split()
-                fonts_word.append("(Near: '" + raw_text + "') : (Font changes in word: '" + words_raw[-1] + words_content[0] + "') : '<" + font_p + ">" + words_raw[-1] + "<" + text_ff + ">" + words_content[0] + "'")
+
+                if len(words_raw) > 0:
+                    word_first_part = words_raw[-1]
+                else:
+                    word_first_part = ''
+
+                if len(words_content) > 0:
+                    word_last_part = words_content[0]
+                else:
+                    word_last_part = ''
+
+                fonts_word.append("(Near: '" + raw_text + "') : (Font changes in word: '" + word_first_part + word_last_part + "') : '<" + font_p + ">" + word_first_part + "<" + text_ff + ">" + word_last_part + "'")
 
 
     if font_prev != text_font_family:
