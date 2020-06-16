@@ -129,6 +129,7 @@ nestinglevel = ""
 lists = {}
 footnotes = {}
 text_cache = ''
+wrong_words = {}
 
 syntax_exlude_map={}
 syntax_incusive_map={}
@@ -169,16 +170,6 @@ headings['HEADING_3'] = '#### '
 headings['HEADING_4'] = '##### '
 headings['HEADING_5'] = '###### '
 headings['HEADING_6'] = '####### '
-
-wrong_words = {}
-wrong_words['venice'] = "Policies and Services Manager"
-wrong_words['naples'] = "Distributed Services Card"
-wrong_words['dsp'] = "** Remove, we dont use DSP as abrivation **"
-wrong_words['\nwe '] = "Distributed Services Card"
-wrong_words[' we '] = "Distributed Services Card"
-wrong_words['\ni '] = "** Rewite Sentence, to remove I **"
-wrong_words[' i '] = "** Rewite Sentence, to remove I **"
-
 
 namedStyleType = {}
 namedStyleType['NORMAL_TEXT'] = ''
@@ -221,6 +212,24 @@ css_def = (
     '</style>\n'
 )
 
+def get_json_file(location, filename_only):
+    global wrong_words
+
+    content = None
+
+    filename = location + "/" + filename_only
+
+    if os.path.isfile(filename):
+        verbose_print("Using config file: %s" % filename)
+        with open(filename, "r") as read_file:
+            content = json.load(read_file)
+    else:
+        print("Error: Could not locate config file: %s" % filename, file=sys.stderr)
+        exit (1)
+    
+
+    return content
+
 def get_doc_meta(documentid):
     global doc_meta_dir
 
@@ -262,7 +271,11 @@ def look4words(text_local, font):
     if font != None and 'Courier New' in font:
         verbose_print("Found Courier New, skipping word check...")
         return False
-    for key, value in wrong_words.items():
+    if not 'badwords' in wrong_words:
+        print("Error: could not find the Bad Word Dict, exiting", file=sys.stderr)
+        exit (1)
+
+    for key, value in wrong_words['badwords'].items():
         if key in text_local.lower():
             words_list.append("(Incorrect word found: '" + key + "') : 'Suggestion: '" + value + "'")
             local_flag = True
@@ -1219,7 +1232,9 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
     return text
 
 def main():
-    global current_dir, final_dir_md, final_dir_bm, doc_lists, headless, files_map, urls_map, download_dir, bitmap_path_md, vp, scan, DOCUMENT_ID, DOCUMENT_TITLE, DOCUMENT_URL, SUGGEST_MODE, figure_list, doc_meta, doc_meta_dir
+    global wrong_words, current_dir, final_dir_md, final_dir_bm, doc_lists, headless, files_map, urls_map, download_dir, bitmap_path_md, vp, scan, DOCUMENT_ID, DOCUMENT_TITLE, DOCUMENT_URL, SUGGEST_MODE, figure_list, doc_meta, doc_meta_dir
+
+    wrong_words = get_json_file(".","config.json")
 
     if 'accept_suggestions' in args and args.accept_suggestions:
         SUGGEST_MODE="PREVIEW_SUGGESTIONS_ACCEPTED"
