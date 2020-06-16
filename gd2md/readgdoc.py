@@ -94,6 +94,7 @@ final_dir_md = ""
 bitmap_path_md = ""
 site = None
 vp = False
+report = False
 #args = None
 
 raw_text = ""
@@ -244,9 +245,9 @@ def normalize_string(old_text, new_content):
     return result
 
 def verbose_print(text, dedupe=True):
-    global vp, text_cache
+    global vp, report, text_cache
 
-    if vp and (text_cache != text or dedupe == False):
+    if (vp or report) and (text_cache != text or dedupe == False):
         text_cache = text
         print(text)
         return True
@@ -455,7 +456,10 @@ def download_image(url):
     return name
 
 def dump_stats():
-    global fonts_stats, image_stats, fonts_family_stats, SUGGEST_MODE, figure_list
+    global vp, report, scan, fonts_stats, image_stats, fonts_family_stats, SUGGEST_MODE, figure_list
+
+    if vp or scan:
+        report = True
 
     now = datetime.now()
     dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -481,7 +485,7 @@ def dump_stats():
             count = 0
             for item in fonts_family_stats[key]:
                 count += 1
-                print("      %s. %s" % (count, clean_string(item)))
+                verbose_print("      %s. %s" % (count, clean_string(item)))
 
     verbose_print("\nFonts Changes:")
     verbose_print("--------------")
@@ -490,7 +494,7 @@ def dump_stats():
         cleaned_string = clean_string(item)
         if not cleaned_string.endswith("<Arial>:'"):
             count += 1
-            print("      %s. %s" % (count, clean_string(item)))
+            verbose_print("      %s. %s" % (count, clean_string(item)))
 
     verbose_print("\nFonts Size Changes:")
     verbose_print("-------------------")
@@ -585,6 +589,10 @@ def dump_stats():
 
 
     verbose_print("\n%s" % line)
+
+    report = False
+
+    return True
 
 def getDuplicatesWithCount(listOfElems):
     ''' Get frequency count of duplicate elements in the given list '''
@@ -1225,7 +1233,6 @@ def main():
         headless = False
     elif args.command == "scan":
         scan = True
-        vp = True
     else:
         headless = False
 
