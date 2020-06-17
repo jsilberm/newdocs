@@ -3,13 +3,21 @@
 	{
 		"venice": "Policies and Services Manager",
 		"naples": "Distributed Services Card",
-		"dsp": "** Remove, we dont use DSP as abrivation **",
+		" dsp ": "** Remove, we dont use DSP as abrivation **",
 		"\nwe": "** Re-wite Sentence, to remove we **",
 		" we ":  "** Re-wite Sentence, to remove we **",
 		" i ": "** Re-wite Sentence, to remove I **",
 		"users guide": "User Guide",
 		"user's guide": "User Guide",
 		"user's": "user",
-		"enterprise solution": "Enterprise Edition"
+		"enterprise solution": "Enterprise Edition",
+		" your ": "the"
+	},
+	"badwordsok":
+	{
+		"pensando dsp dsc-25": " dsp ",
+		"pensando dsp dsc-50": " dsp ",
+		"pensando dsp dsc-100": " dsp "
+
 	}
 }

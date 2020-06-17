@@ -271,14 +271,26 @@ def look4words(text_local, font):
     if font != None and 'Courier New' in font:
         verbose_print("Found Courier New, skipping word check...")
         return False
+
     if not 'badwords' in wrong_words:
         print("Error: could not find the Bad Word Dict, exiting", file=sys.stderr)
         exit (1)
 
+    if not 'badwordsok' in wrong_words:
+        print("Error: could not find the Bad Word OK Dict, exiting", file=sys.stderr)
+        exit (1)
+
     for key, value in wrong_words['badwords'].items():
         if key in text_local.lower():
-            words_list.append("(Incorrect word found: '" + key + "') : 'Suggestion: '" + value + "'")
-            local_flag = True
+            bad_flag = True
+            for keyok, valueok in wrong_words['badwordsok'].items():
+                if keyok in text_local.lower():
+                    bad_flag = False
+                    break
+            if bad_flag:    
+                words_list.append("(Incorrect word found: '" + key + "') : 'Suggestion: '" + value + "'")
+                local_flag = True
+                
     return local_flag
 
 def add_syntax_exlusion(parser_name, cmds):
