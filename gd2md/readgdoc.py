@@ -286,7 +286,7 @@ def scan4words(text_local):
                     bad_flag = False
                     break
             if bad_flag:    
-                words_list_text.append("(Incorrect word found: '" + key + " : Occurences: " + str(count) + "') : 'Suggestion: '" + value + "'")
+                words_list_text.append("Incorrect word found: '" + key + "' : Occurences: " + str(count) + " : Suggestion: '" + value + "'")
                 local_flag = True
 
     return local_flag
