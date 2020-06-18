@@ -277,8 +277,24 @@ def scan4words(text_local):
         print("Error: could not find the Bad Word OK Dict, exiting", file=sys.stderr)
         exit (1)
 
+    if not 'badwordscase' in wrong_words:
+        print("Error: could not find the Bad Case Dict, exiting", file=sys.stderr)
+        exit (1)
+
     for key, value in wrong_words['badwords'].items():
         count = sum(1 for _ in re.finditer(r'\b%s\b' % re.escape(key), text_local.lower()))
+        if count > 0:
+            bad_flag = True
+            for keyok, valueok in wrong_words['badwordsok'].items():
+                if keyok in text_local.lower():
+                    bad_flag = False
+                    break
+            if bad_flag:    
+                words_list_text.append("Incorrect word found: '" + key + "' : Occurences: " + str(count) + " : Suggestion: '" + value + "'")
+                local_flag = True
+
+    for key, value in wrong_words['badwordscase'].items():
+        count = sum(1 for _ in re.finditer(r'\b%s\b' % re.escape(key), text_local))
         if count > 0:
             bad_flag = True
             for keyok, valueok in wrong_words['badwordsok'].items():
@@ -862,8 +878,8 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
     # Obsolited, replaced with scan4words
     # look4words(text_content_raw, text_font_family)
 
-    if 'Kind or Tag (arbitrary' in text_content_raw:
-        print("Stop")
+    #if 'Kind or Tag (arbitrary' in text_content_raw:
+    #    print("Stop")
 
     if font_size_prev != None:
         if font_size_prev != text_font_size and len(raw_text) > 0 and len(text_content) > 0:
@@ -1126,8 +1142,8 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
     listid = ''
     for value in elements:
         Dcount += 1
-        if Dcount == 221:
-            verbose_print('*** STOP ***')
+        #if Dcount == 221:
+        #    verbose_print('*** STOP ***')
 
         if 'paragraph' in value:
             elements = value.get('paragraph').get('elements')
@@ -1201,8 +1217,6 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                                 if not text.endswith('\n'):
                                     text += '\n'
                                 text += "![image alt text](" + bitmap_path_md + "/" + name + ")"
-                                if 'e97d284661e1' in name:
-                                    print("**Stop**)")
                             else:
                                 image_stats['bitmap'] += 1
                         else:
@@ -1306,6 +1320,29 @@ def main():
         scan = True
     else:
         headless = False
+
+    if 'wordlist_shown' in args and args.wordlist_shown and scan:
+        count = 0
+        print("\nIncorrect Words defined:")
+        print("------------------------")
+        print("Case Insensitive words:")
+        for key, value in wrong_words['badwords'].items():
+            count += 1
+            print("   %s. '%s' --> '%s'" % (count, key, value))
+
+        count = 0
+        print("\nCase Sensitive words:")
+        for key, value in wrong_words['badwordscase'].items():
+            count += 1
+            print("   %s. '%s' --> '%s'" % (count, key, value))
+
+        count = 0
+        print("\nExceptions for sentences with bad words:")
+        for key, value in wrong_words['badwordsok'].items():
+            count += 1
+            print("   %s. '%s' --> '%s'" % (count, value, key))
+
+        sys.exit(0)
 
     if not os.path.exists(download_dir) and scan == False:
         verbose_print("Creating %s folder for Chromium downloads (fixed location)" % download_dir)
@@ -1456,8 +1493,9 @@ if __name__ == '__main__':
     parser_c = subparsers.add_parser(parser_name, help='Scans a Google Doc and reports stats')
     parser_c.add_argument('-a', '--accept_suggestions', action='store_true', help='Reads the document as if all suggestions where accepted, if not set suggestions are ignored.')
     parser_c.add_argument('-m', '--meta_ignore', action='store_true', help='Ignores any metafile associated with this doc.')
-    parser_c.add_argument('-i', '--id', required=True, nargs=1, help='Google Doc ID', metavar="")
-    add_syntax_inclusion(parser_name, "id")
+    parser_c.add_argument('-i', '--id', required=False, nargs=1, help='Google Doc ID', metavar="")
+    parser_c.add_argument('-w', '--wordlist_show', action='store_true', help='Shows the Bad Words and exception sentences.')
+    add_syntax_exlusion(parser_name, "id, wordlist_show")
 
     if len(sys.argv)==1:
       parser.print_help()
