@@ -1321,7 +1321,7 @@ def main():
     else:
         headless = False
 
-    if 'wordlist_shown' in args and args.wordlist_shown and scan:
+    if 'wordlist_show' in args and args.wordlist_show and scan:
         count = 0
         print("\nIncorrect Words defined:")
         print("------------------------")
