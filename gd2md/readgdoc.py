@@ -57,6 +57,9 @@ import re
 #
 # ./readgdoc headless -i <Document ID> -b "/my_mount_2_dest/images" -d "/my_mount_2_dest" -r "./images"
 #
+# Example 3:
+# To scan the doc and get report only:
+# ./readgdoc scan -i <Document ID>
 #
 ###################################################################################################################################
 
@@ -91,6 +94,7 @@ final_dir_md = ""
 bitmap_path_md = ""
 site = None
 vp = False
+report = False
 #args = None
 
 raw_text = ""
@@ -110,6 +114,7 @@ font_prev = None
 fonts_size_word = []
 font_size_prev = None
 words_list = []
+words_list_text = []
 figure_list = []
 
 Dcount = 0
@@ -125,6 +130,7 @@ nestinglevel = ""
 lists = {}
 footnotes = {}
 text_cache = ''
+wrong_words = {}
 
 syntax_exlude_map={}
 syntax_incusive_map={}
@@ -165,16 +171,6 @@ headings['HEADING_3'] = '#### '
 headings['HEADING_4'] = '##### '
 headings['HEADING_5'] = '###### '
 headings['HEADING_6'] = '####### '
-
-wrong_words = {}
-wrong_words['venice'] = "Policies and Services Manager"
-wrong_words['naples'] = "Distributed Services Card"
-wrong_words['dsp'] = "** Remove, we dont use DSP as abrivation **"
-wrong_words['\nwe '] = "Distributed Services Card"
-wrong_words[' we '] = "Distributed Services Card"
-wrong_words['\ni '] = "** Rewite Sentence, to remove I **"
-wrong_words[' i '] = "** Rewite Sentence, to remove I **"
-
 
 namedStyleType = {}
 namedStyleType['NORMAL_TEXT'] = ''
@@ -217,8 +213,28 @@ css_def = (
     '</style>\n'
 )
 
+def get_json_file(location, filename_only):
+    global wrong_words
+
+    content = None
+
+    filename = location + "/" + filename_only
+
+    if os.path.isfile(filename):
+        verbose_print("Using config file: %s" % filename)
+        with open(filename, "r") as read_file:
+            content = json.load(read_file)
+    else:
+        print("Error: Could not locate config file: %s" % filename, file=sys.stderr)
+        exit (1)
+    
+
+    return content
+
 def get_doc_meta(documentid):
     global doc_meta_dir
+
+    meta = False
 
     filename = doc_meta_dir + "/" + documentid + ".meta"
 
@@ -239,14 +255,58 @@ def normalize_string(old_text, new_content):
     return result
 
 def verbose_print(text, dedupe=True):
-    global vp, text_cache
+    global vp, report, text_cache
 
-    if vp and (text_cache != text or dedupe == False):
+    if (vp or report) and (text_cache != text or dedupe == False):
         text_cache = text
         print(text)
         return True
 
     return False
+
+def scan4words(text_local):
+    global words_list_text
+
+    local_flag = False
+
+    if not 'badwords' in wrong_words:
+        print("Error: could not find the Bad Word Dict, exiting", file=sys.stderr)
+        exit (1)
+
+    if not 'badwordsok' in wrong_words:
+        print("Error: could not find the Bad Word OK Dict, exiting", file=sys.stderr)
+        exit (1)
+
+    if not 'badwordscase' in wrong_words:
+        print("Error: could not find the Bad Case Dict, exiting", file=sys.stderr)
+        exit (1)
+
+    for key, value in wrong_words['badwords'].items():
+        count = sum(1 for _ in re.finditer(r'\b%s\b' % re.escape(key), text_local.lower()))
+        if count > 0:
+            bad_flag = True
+            for keyok, valueok in wrong_words['badwordsok'].items():
+                if keyok in text_local.lower():
+                    bad_flag = False
+                    break
+            if bad_flag:    
+                words_list_text.append("Incorrect word found: '" + key + "' : Occurences: " + str(count) + " : Suggestion: '" + value + "'")
+                local_flag = True
+
+    for key, value in wrong_words['badwordscase'].items():
+        count = sum(1 for _ in re.finditer(r'\b%s\b' % re.escape(key), text_local))
+        if count > 0:
+            bad_flag = True
+            for keyok, valueok in wrong_words['badwordsok'].items():
+                if keyok in text_local.lower():
+                    bad_flag = False
+                    break
+            if bad_flag:    
+                words_list_text.append("Incorrect word found: '" + key + "' : Occurences: " + str(count) + " : Suggestion: '" + value + "'")
+                local_flag = True
+
+    return local_flag
+
 
 def look4words(text_local, font):
     global words_list
@@ -256,10 +316,26 @@ def look4words(text_local, font):
     if font != None and 'Courier New' in font:
         verbose_print("Found Courier New, skipping word check...")
         return False
-    for key, value in wrong_words.items():
+
+    if not 'badwords' in wrong_words:
+        print("Error: could not find the Bad Word Dict, exiting", file=sys.stderr)
+        exit (1)
+
+    if not 'badwordsok' in wrong_words:
+        print("Error: could not find the Bad Word OK Dict, exiting", file=sys.stderr)
+        exit (1)
+
+    for key, value in wrong_words['badwords'].items():
         if key in text_local.lower():
-            words_list.append("(Incorrect word found: '" + key + "') : 'Suggestion: '" + value + "'")
-            local_flag = True
+            bad_flag = True
+            for keyok, valueok in wrong_words['badwordsok'].items():
+                if keyok in text_local.lower():
+                    bad_flag = False
+                    break
+            if bad_flag:    
+                words_list.append("(Incorrect word found: '" + key + "') : 'Suggestion: '" + value + "'")
+                local_flag = True
+
     return local_flag
 
 def add_syntax_exlusion(parser_name, cmds):
@@ -450,7 +526,10 @@ def download_image(url):
     return name
 
 def dump_stats():
-    global fonts_stats, image_stats, fonts_family_stats, SUGGEST_MODE, figure_list
+    global vp, report, scan, fonts_stats, image_stats, fonts_family_stats, SUGGEST_MODE, figure_list, words_list, words_list_text
+
+    if vp or scan:
+        report = True
 
     now = datetime.now()
     dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -476,7 +555,7 @@ def dump_stats():
             count = 0
             for item in fonts_family_stats[key]:
                 count += 1
-                print("      %s. %s" % (count, clean_string(item)))
+                verbose_print("      %s. %s" % (count, clean_string(item)))
 
     verbose_print("\nFonts Changes:")
     verbose_print("--------------")
@@ -485,21 +564,29 @@ def dump_stats():
         cleaned_string = clean_string(item)
         if not cleaned_string.endswith("<Arial>:'"):
             count += 1
-            print("      %s. %s" % (count, clean_string(item)))
+            verbose_print("      %s. %s" % (count, clean_string(item)))
 
     verbose_print("\nFonts Size Changes:")
     verbose_print("-------------------")
     count = 0
     for item in fonts_size_word:
         count += 1
-        print("      %s. %s" % (count, clean_string(item)))    
+        verbose_print("      %s. %s" % (count, clean_string(item)))    
+
+    # verbose_print("\nIncorrect words found:")
+    # verbose_print("----------------------")
+    # count = 0
+    # for item in words_list:
+    #    count += 1
+    #    verbose_print("      %s. %s" % (count, clean_string(item))) 
 
     verbose_print("\nIncorrect words found:")
     verbose_print("----------------------")
     count = 0
-    for item in words_list:
+    for item in words_list_text:
         count += 1
-        print("      %s. %s" % (count, clean_string(item))) 
+        verbose_print("      %s. %s" % (count, clean_string(item))) 
+
 
     verbose_print("\nFonts Size Statistics:")
     verbose_print("----------------------")
@@ -509,7 +596,7 @@ def dump_stats():
     total_images = image_stats['drawing'] + image_stats['bitmap']
     verbose_print("\nImage Statistics:")
     verbose_print("-----------------")    
-    verbose_print("# of Botmap Objects: %s" % image_stats['bitmap'])
+    verbose_print("# of Bitmap Objects: %s" % image_stats['bitmap'])
     verbose_print("# of Drawings Objects: %s" % image_stats['drawing'])
     verbose_print("# of Total images: %s" % total_images)
 
@@ -541,18 +628,18 @@ def dump_stats():
             if not key in doc_meta['figuresGroup']: 
                 if value > 1:
                     count +=1
-                    verbose_print("        %s. Figure: %s # To Many Occurrences, Expected: 1 Found: %s" % (count, key, value))
+                    verbose_print("        %s. Figure: %s # To Many occurrences, Expected: 1 Found: %s" % (count, key, value))
                     dup_number_2few += (value - 1)
             else:
                 expected_value = doc_meta['figuresGroup'][key]
                 if expected_value != value:
                     if expected_value < value:
                         count +=1
-                        verbose_print("        %s. Figure: %s # To Many Occurrences, Expected: %s Found: %s" % (count, key, expected_value, value))
+                        verbose_print("        %s. Figure: %s # To Many occurrences, Expected: %s Found: %s" % (count, key, expected_value, value))
                         dup_number_2many += (value - expected_value)
                     else:
                         count +=1
-                        verbose_print("        %s. Figure: %s # To Few Occurrences, Expected: %s Found: %s" % (count, key, expected_value, value))
+                        verbose_print("        %s. Figure: %s # To Few occurrences, Expected: %s Found: %s" % (count, key, expected_value, value))
                         dup_number_2few += (expected_value - value)
                 else:
                     count +=1
@@ -580,6 +667,10 @@ def dump_stats():
 
 
     verbose_print("\n%s" % line)
+
+    report = False
+
+    return True
 
 def getDuplicatesWithCount(listOfElems):
     ''' Get frequency count of duplicate elements in the given list '''
@@ -772,6 +863,7 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
     """
     empty_header = None
     
+
     text_local = ''
     list_local = []
     text_run = element.get('textRun')
@@ -783,10 +875,11 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
     text_content_esc = replace_escape_characters(text_content_raw)
     text_content = escape_characters(text_content_esc)
 
-    look4words(text_content_raw, text_font_family)
+    # Obsolited, replaced with scan4words
+    # look4words(text_content_raw, text_font_family)
 
-    if 'Kind or Tag (arbitrary' in text_content_raw:
-        print("Stop")
+    #if 'Kind or Tag (arbitrary' in text_content_raw:
+    #    print("Stop")
 
     if font_size_prev != None:
         if font_size_prev != text_font_size and len(raw_text) > 0 and len(text_content) > 0:
@@ -803,7 +896,18 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
 
                 words_raw = raw_text.split()
                 words_content = text_content.split()
-                fonts_size_word.append("(Near: '" + raw_text + "') : (Font size changes in word: '" + words_raw[-1] + words_content[0] + "') : '<Size: " + font_sp + ">" + words_raw[-1] + "<Size: " + text_fs + ">" + words_content[0] + "'")
+
+                if len(words_raw) > 0:
+                    word_first_part = words_raw[-1]
+                else:
+                    word_first_part = ''
+
+                if len(words_content) > 0:
+                    word_last_part = words_content[0]
+                else:
+                    word_last_part = ''
+
+                fonts_size_word.append("(Near: '" + raw_text + "') : (Font size changes in word: '" + word_first_part + word_last_part + "') : '<Size: " + font_sp + ">" + word_first_part + "<Size: " + text_fs + ">" + word_last_part + "'")
 
 
     if font_size_prev != text_font_size:
@@ -825,7 +929,18 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
 
                 words_raw = raw_text.split()
                 words_content = text_content.split()
-                fonts_word.append("(Near: '" + raw_text + "') : (Font changes in word: '" + words_raw[-1] + words_content[0] + "') : '<" + font_p + ">" + words_raw[-1] + "<" + text_ff + ">" + words_content[0] + "'")
+
+                if len(words_raw) > 0:
+                    word_first_part = words_raw[-1]
+                else:
+                    word_first_part = ''
+
+                if len(words_content) > 0:
+                    word_last_part = words_content[0]
+                else:
+                    word_last_part = ''
+
+                fonts_word.append("(Near: '" + raw_text + "') : (Font changes in word: '" + word_first_part + word_last_part + "') : '<" + font_p + ">" + word_first_part + "<" + text_ff + ">" + word_last_part + "'")
 
 
     if font_prev != text_font_family:
@@ -909,10 +1024,10 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
         if text_content == ' ':
             if footnote_count == 1:
                 footnote_count = 0
-                return text_local, empty_header
+                return text_local, empty_header, text_content_raw
             else:
                 text_local += text_content
-            return text_local, empty_header
+            return text_local, empty_header, text_content_raw
 
         #Center
         if para.alignment == "CENTER" and para.alignment_flag == False:
@@ -951,17 +1066,17 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
         if text_font_begin:
             if footnote_flag == True:
                 if text_content == '\n':
-                    return text_local, empty_header
+                    return text_local, empty_header, text_content_raw
                 text_local += text_font_begin.strip()
             elif text_local + text_content == '\n':
-                return '\n', empty_header
+                return '\n', empty_header, text_content_raw
             elif bullet_count == 1:
                 text_local += text_font_begin.strip()
             else:
                 text_local += text_font_begin
 
         if not text_run:
-            return '', empty_header
+            return '', empty_header, text_content_raw
 
         # Add textStyle before text
         if text_content != '\n':
@@ -1009,7 +1124,7 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
         #    if a > 0:
         #        text_local = text_local[:idx] + (' ' * a) + text_local[idx:]
 
-    return text_local, empty_header
+    return text_local, empty_header, text_content_raw
 
 
 def read_strucutural_elements(document, elements, current_text, current_footnotes_text, tblscsr):
@@ -1022,12 +1137,13 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
             elements: a list of Structural Elements.
     """
     text = ''
+    text_only_doc = ''
     footnotes_text = ''
     listid = ''
     for value in elements:
         Dcount += 1
-        if Dcount == 221:
-            verbose_print('*** STOP ***')
+        #if Dcount == 221:
+        #    verbose_print('*** STOP ***')
 
         if 'paragraph' in value:
             elements = value.get('paragraph').get('elements')
@@ -1101,8 +1217,6 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                                 if not text.endswith('\n'):
                                     text += '\n'
                                 text += "![image alt text](" + bitmap_path_md + "/" + name + ")"
-                                if 'e97d284661e1' in name:
-                                    print("**Stop**)")
                             else:
                                 image_stats['bitmap'] += 1
                         else:
@@ -1125,13 +1239,15 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                     footnote = footnotes[footnoteId]
                     flags += 'footnote'
                     footnote_flag = True
-                    text_tmp = read_strucutural_elements(document, footnote, current_text, footnotes_text, False)
+                    text_tmp, text_only_doc_tmp = read_strucutural_elements(document, footnote, current_text, footnotes_text, False)
                     footnote_flag = False
                     footnotes_text += '[^' + footnoteId + ']: ' + text_tmp.lstrip()
+                    text_only_doc += text_only_doc_tmp
                 elif 'pageBreak' in elem:
                     verbose_print("Ignoring pageBreak")
                 else:
-                    text_tmp, rmtxt = read_paragraph_element(elem, tblscsr, text, flags, listid)
+                    text_tmp, rmtxt, text_only_doc_tmp = read_paragraph_element(elem, tblscsr, text, flags, listid)
+                    text_only_doc += text_only_doc_tmp
                     if rmtxt == None:
                         text += text_tmp
                     else:
@@ -1149,18 +1265,20 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                     cells = row.get('tableCells')
                     for cell in cells:
                         cell_content_element = cell.get('content')
-                        cell_content = read_strucutural_elements(document, cell_content_element, text, footnotes_text, True)
+                        cell_content, text_only_doc_tmp = read_strucutural_elements(document, cell_content_element, text, footnotes_text, True)
                         text += cell_content
+                        text_only_doc += text_only_doc_tmp
             else:
                 text += '<div class="p-table center"><div></div>\n\n'
                 for row in table.get('tableRows'):
                     cells = row.get('tableCells')
                     for cell in cells:
                         cell_content_element = cell.get('content')
-                        cell_content = read_strucutural_elements(document, cell_content_element, text, footnotes_text, False)
+                        cell_content, text_only_doc_tmp = read_strucutural_elements(document, cell_content_element, text, footnotes_text, False)
                         cell_content = cell_content.rstrip()
                         cell_content = cell_content.replace('\n', '<br>')  
                         text += "| " + cell_content + " "
+                        text_only_doc += text_only_doc_tmp
 
                     text += "|\n"
 
@@ -1181,10 +1299,12 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
 
     text += '  \n  \n' + footnotes_text
 
-    return text
+    return text, text_only_doc
 
 def main():
-    global current_dir, final_dir_md, final_dir_bm, doc_lists, headless, files_map, urls_map, download_dir, bitmap_path_md, vp, scan, DOCUMENT_ID, DOCUMENT_TITLE, DOCUMENT_URL, SUGGEST_MODE, figure_list, doc_meta, doc_meta_dir
+    global wrong_words, current_dir, final_dir_md, final_dir_bm, doc_lists, headless, files_map, urls_map, download_dir, bitmap_path_md, vp, scan, DOCUMENT_ID, DOCUMENT_TITLE, DOCUMENT_URL, SUGGEST_MODE, figure_list, doc_meta, doc_meta_dir
+
+    wrong_words = get_json_file(".","config.json")
 
     if 'accept_suggestions' in args and args.accept_suggestions:
         SUGGEST_MODE="PREVIEW_SUGGESTIONS_ACCEPTED"
@@ -1198,9 +1318,31 @@ def main():
         headless = False
     elif args.command == "scan":
         scan = True
-        vp = True
     else:
         headless = False
+
+    if 'wordlist_show' in args and args.wordlist_show and scan:
+        count = 0
+        print("\nIncorrect Words defined:")
+        print("------------------------")
+        print("Case Insensitive words:")
+        for key, value in wrong_words['badwords'].items():
+            count += 1
+            print("   %s. '%s' --> '%s'" % (count, key, value))
+
+        count = 0
+        print("\nCase Sensitive words:")
+        for key, value in wrong_words['badwordscase'].items():
+            count += 1
+            print("   %s. '%s' --> '%s'" % (count, key, value))
+
+        count = 0
+        print("\nExceptions for sentences with bad words:")
+        for key, value in wrong_words['badwordsok'].items():
+            count += 1
+            print("   %s. '%s' --> '%s'" % (count, value, key))
+
+        sys.exit(0)
 
     if not os.path.exists(download_dir) and scan == False:
         verbose_print("Creating %s folder for Chromium downloads (fixed location)" % download_dir)
@@ -1221,19 +1363,21 @@ def main():
     if scan == False and args.cache_enable == False:
         files_map, urls_map = parse_gdoc.parseDocument(DOCUMENT_URL, username, pwdfile, download_dir, headless, vp)
         if args.write_cache:
-            save_object_file(current_dir + "/" + DOCUMENT_ID + "_files_map.picl", files_map)
-            save_object_file(current_dir + "/" + DOCUMENT_ID + "_urls_map.picl", urls_map)
+            save_object_file(current_dir + "/cache/" + DOCUMENT_ID + "_files_map.picl", files_map)
+            save_object_file(current_dir + "/cache/" + DOCUMENT_ID + "_urls_map.picl", urls_map)
 
     if scan == False and args.cache_enable:
-        files_map = read_object_file(current_dir + "/" + DOCUMENT_ID + "_files_map.picl")
-        urls_map = read_object_file(current_dir + "/" + DOCUMENT_ID + "_urls_map.picl")
+        files_map = read_object_file(current_dir + "/cache/" + DOCUMENT_ID + "_files_map.picl")
+        urls_map = read_object_file(current_dir + "/cache/" + DOCUMENT_ID + "_urls_map.picl")
         for key, value in files_map.items():
             verbose_print("files_map['%s'] = '%s'" % (key, value))
         for key, value in urls_map.items():
             verbose_print("urls_map['%s'] = '%s'" % (key, value))
 
     if 'meta_ignore' in args and args.meta_ignore == False:
-        doc_meta = get_doc_meta(DOCUMENT_ID)
+        doc_meta_result = get_doc_meta(DOCUMENT_ID)
+        if doc_meta_result != False:
+            doc_meta = doc_meta_result
 
     """Shows basic usage of the Docs API.
     Prints the title of a sample document.
@@ -1269,6 +1413,7 @@ def main():
 
     DOCUMENT_TITLE = document.get('title')
     doc_title_name = final_dir_md + "/" + DOCUMENT_TITLE.replace(' ', '_') + ".md"
+    doc_title_name_text_only = final_dir_md + "/" + DOCUMENT_TITLE.replace(' ', '_') + ".txt"
 
     verbose_print('Processing document: {}'.format(document.get('title')))
 
@@ -1283,7 +1428,7 @@ def main():
     populate_lists(doc_lists)
     populate_footnotes(doc_footnotes)
 
-    md = read_strucutural_elements(document, doc_content, '', '', False)
+    md, text_only_doc = read_strucutural_elements(document, doc_content, '', '', False)
 
     md = css_def + md
 
@@ -1292,11 +1437,17 @@ def main():
             f.write(md)
         f.close()
 
+        with open(doc_title_name_text_only, 'w', encoding='utf-8') as f:
+            f.write(text_only_doc)
+        f.close()
+
         verbose_print("Final MD file: %s" % doc_title_name)
 
     # Post Parsing
     regex = r"(?<=[^\*\*]\*Figure\s)\d{1,3}(?=\.)"
     figure_list = re.findall(regex, md, re.MULTILINE)
+
+    scan4words(text_only_doc)
     dump_stats()
 
 if __name__ == '__main__':
@@ -1342,8 +1493,9 @@ if __name__ == '__main__':
     parser_c = subparsers.add_parser(parser_name, help='Scans a Google Doc and reports stats')
     parser_c.add_argument('-a', '--accept_suggestions', action='store_true', help='Reads the document as if all suggestions where accepted, if not set suggestions are ignored.')
     parser_c.add_argument('-m', '--meta_ignore', action='store_true', help='Ignores any metafile associated with this doc.')
-    parser_c.add_argument('-i', '--id', required=True, nargs=1, help='Google Doc ID', metavar="")
-    add_syntax_inclusion(parser_name, "id")
+    parser_c.add_argument('-i', '--id', required=False, nargs=1, help='Google Doc ID', metavar="")
+    parser_c.add_argument('-w', '--wordlist_show', action='store_true', help='Shows the Bad Words and exception sentences.')
+    add_syntax_exlusion(parser_name, "id, wordlist_show")
 
     if len(sys.argv)==1:
       parser.print_help()
