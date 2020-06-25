@@ -116,6 +116,9 @@ font_size_prev = None
 words_list = []
 words_list_text = []
 figure_list = []
+table_list =[]
+
+table_counter = 0
 
 Dcount = 0
 fenced_flag = False
@@ -526,7 +529,7 @@ def download_image(url):
     return name
 
 def dump_stats():
-    global vp, report, scan, fonts_stats, image_stats, fonts_family_stats, SUGGEST_MODE, figure_list, words_list, words_list_text
+    global table_counter, vp, report, scan, fonts_stats, image_stats, fonts_family_stats, SUGGEST_MODE, figure_list,table_list, words_list, words_list_text
 
     if vp or scan:
         report = True
@@ -598,19 +601,33 @@ def dump_stats():
     verbose_print("-----------------")    
     verbose_print("# of Bitmap Objects: %s" % image_stats['bitmap'])
     verbose_print("# of Drawings Objects: %s" % image_stats['drawing'])
-    verbose_print("# of Total images: %s" % total_images)
+    verbose_print("# of Total images (Exluding First page Pensando logo image): %s" % total_images)
+
+    #Dont Count Document History Table as table
+    if table_counter > 0:
+        table_counter -=1
+    verbose_print("\nTable Statistics:")
+    verbose_print("-----------------")    
+    verbose_print("# of Tables found (Exluding Doc. History table): %s" % table_counter)
 
 
-    verbose_print("\nfiguresGroup Meta Filtering:")
-    verbose_print("----------------------------")
+    verbose_print("\nfigure and Table Groups Meta Filtering:")
+    verbose_print("----------------------------------------")
 
     image_adjust = 0
+    table_adjust = 0
     if 'figuresGroup' in doc_meta:
         for key,value in doc_meta['figuresGroup'].items():
             if value > 1:
                 image_adjust += (value - 1)
                 verbose_print("Figure: %s is expected to have: %s Figures." % (key, value))
-        
+
+    if 'tablesGroup' in doc_meta:
+        for key,value in doc_meta['tablesGroup'].items():
+            if value > 1:
+                table_adjust += (value - 1)
+                verbose_print("Table: %s is expected to have: %s Tables." % (key, value))
+              
     # Exclude Pensando Logo, it is expected...
     if total_images > 0:
         image_adjust += 1
@@ -665,6 +682,57 @@ def dump_stats():
 
     verbose_print("\n    Figures are numbered in sequence (Independent of missing or duplicate Figures): %s" % figure_order)
 
+    ######### TABLE #############
+
+    duplicates = getDuplicatesWithCount(table_list)
+    verbose_print("\nTable Counter Statistics:")
+    verbose_print("--------------------------")
+    verbose_print("\n    Duplicated Table References: %s" % (len(duplicates)))
+
+    count = 0
+    dup_number_2many = 0
+    dup_number_2few = 0
+    for key, value in duplicates.items():
+        if 'tablesGroup' in doc_meta:
+            if not key in doc_meta['tablesGroup']: 
+                if value > 1:
+                    count +=1
+                    verbose_print("        %s. Table: %s # To Many occurrences, Expected: 1 Found: %s" % (count, key, value))
+                    dup_number_2few += (value - 1)
+            else:
+                expected_value = doc_meta['tablesGroup'][key]
+                if expected_value != value:
+                    if expected_value < value:
+                        count +=1
+                        verbose_print("        %s. Table: %s # To Many occurrences, Expected: %s Found: %s" % (count, key, expected_value, value))
+                        dup_number_2many += (value - expected_value)
+                    else:
+                        count +=1
+                        verbose_print("        %s. Table: %s # To Few occurrences, Expected: %s Found: %s" % (count, key, expected_value, value))
+                        dup_number_2few += (expected_value - value)
+                else:
+                    count +=1
+                    verbose_print("        %s. Table: %s # of occurrences: %s - Correct" % (count, key, value))
+
+
+    verbose_print("\n    Missing Table references: %s" % (table_counter - table_adjust - (len(table_list) - dup_number_2many) + dup_number_2few))
+    count = 0
+    for x in range(1,table_counter - table_adjust):
+        if not str(x) in table_list:
+            count +=1
+            verbose_print("        %s. Expected 'Table: %s.'" % (count, x))
+
+    table_order = True
+    teble_prev = 0
+
+    for x in range(0,len(table_list)):
+        table_value = int(table_list[x])        
+        if table_value >= table_prev:
+            table_prev = table_value
+        else:
+            table_order = False
+
+    verbose_print("\n    Tables are numbered in sequence (Independent of missing or duplicate Tables): %s" % table_order)
 
     verbose_print("\n%s" % line)
 
@@ -1128,7 +1196,7 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
 
 
 def read_strucutural_elements(document, elements, current_text, current_footnotes_text, tblscsr):
-    global para, namedStyleType, testStyle, Dcount, urls_map, fenced_flag, code_flag, bullet_flag, footnote_flag, nestinglevel,final_dir_bm, image_stats, scan
+    global table_counter, para, namedStyleType, testStyle, Dcount, urls_map, fenced_flag, code_flag, bullet_flag, footnote_flag, nestinglevel,final_dir_bm, image_stats, scan
 
     """Recurses through a list of Structural Elements to read a document's text where text may be
         in nested elements.
@@ -1269,6 +1337,7 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                         text += cell_content
                         text_only_doc += text_only_doc_tmp
             else:
+                table_counter += 1
                 text += '<div class="p-table center"><div></div>\n\n'
                 for row in table.get('tableRows'):
                     cells = row.get('tableCells')
@@ -1278,7 +1347,6 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                         cell_content = cell_content.rstrip()
                         cell_content = cell_content.replace('\n', '<br>')  
                         text += "| " + cell_content + " "
-                        text_only_doc += text_only_doc_tmp
 
                     text += "|\n"
 
@@ -1446,6 +1514,10 @@ def main():
     # Post Parsing
     regex = r"(?<=[^\*\*]\*Figure\s)\d{1,3}(?=\.)"
     figure_list = re.findall(regex, md, re.MULTILINE)
+
+    regex = r"(?<=[^\*\*]\*Table\s)\d{1,3}(?=\.)"
+    table_list = re.findall(regex, md, re.MULTILINE)
+
 
     scan4words(text_only_doc)
     dump_stats()

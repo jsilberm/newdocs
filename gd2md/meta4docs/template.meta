@@ -1,0 +1,10 @@
+{
+	"figuresGroup": 
+	{
+		"<Figure #>": <int, Number of occurences>
+	},
+	"tablesGroup": 
+	{
+		"Table #": <int, Number of occurences>
+	}
+}

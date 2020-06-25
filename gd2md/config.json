@@ -1,7 +1,7 @@
 {
 	"badwords": 
 	{
-		" venice": "Policies and Services Manager",
+		" venice": "Policy and Services Manager",
 		" naples": "Distributed Services Card",
 		" dsp": "** Remove, we dont use DSP as abrivation **",
 		" we ":  "** Re-wite Sentence, to remove we **",
@@ -14,22 +14,21 @@
 		" dsc's": "DSCs",
 		" penctl cli": "penctl utility",
 		" penctl tool": "penctl utility",
-		" 6.5": "** Ok if in release notes, but not ingeneric documents **",
-		" 6.7": "** Ok if in release notes, but not ingeneric documents **",
-		" 7.0": "** Ok if in release notes, but not ingeneric documents **",
+		" 6.5": "** Ok if in release notes, but not in generic documents **",
+		" 6.7": "** Ok if in release notes, but not in generic documents **",
+		" 7.0": "** Ok if in release notes, but not in generic documents **",
 		" ionicconfig cli": "ionicConfig utility",
 		" ionicconfig tool": "ionicConfig utility",
-		" restart": "reboot",
-		" reload": "reboot",
-		" reset": "reboot",
+		" restart": "reboot if describing server/computer",
+		" reload": "reboot if describing server/computer",
+		" reset": "reboot if describing server/computer",
 		" user name": ":User ID",
 		" username": "User ID",
-		" userid": " User ID",
+		" userid": "User ID",
 		" rest ": "RESTful",
 		" dsc node": "DSC host",
 		" bi-directional erspan": "Bi-directional flow mirroring (ERSPAN)",
 		" five-tuple": "5-Tuple",
-		" features": "feature-set",
 		" fw": "** Spell it out as Firewall or Firmware **",
 		" enet": "Ethernet",
 		" adapter": "card",
@@ -37,7 +36,12 @@
 		" pipeline": "data path",
 		" controller": "PSM",
 		" vi admin": "Virtual Server admin",
-		" vi administrator": "Virtual Server admin"
+		" vi administrator": "Virtual Server admin",
+		" Policy and Services Manager": "Policy and Services Manager",
+		" dvs": "** Possible change to: 'vSphere Distributed Switch' or 'vDS' **",
+		"null": "** Remove json code **",
+		"feature-set": "feature set"
+
 	},
 	"badwordscase":
 	{
