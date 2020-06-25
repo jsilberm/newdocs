@@ -1,5 +1,9 @@
 {
-	"badwords": 
+	"fd":
+	{
+		"flag_spaces": 2
+	},
+	"badwords":
 	{
 		" venice": "Policy and Services Manager",
 		" naples": "Distributed Services Card",
@@ -10,7 +14,7 @@
 		" user's guide": "User Guide",
 		" user's": "user",
 		" enterprise solution": "Enterprise Edition",
-		" your": "the",
+		" your": "the or a",
 		" dsc's": "DSCs",
 		" penctl cli": "penctl utility",
 		" penctl tool": "penctl utility",

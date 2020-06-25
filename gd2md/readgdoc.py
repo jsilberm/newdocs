@@ -117,6 +117,7 @@ words_list = []
 words_list_text = []
 figure_list = []
 table_list =[]
+spaces_list = []
 
 table_counter = 0
 
@@ -529,7 +530,7 @@ def download_image(url):
     return name
 
 def dump_stats():
-    global table_counter, vp, report, scan, fonts_stats, image_stats, fonts_family_stats, SUGGEST_MODE, figure_list,table_list, words_list, words_list_text
+    global table_counter, vp, report, scan, fonts_stats, image_stats, fonts_family_stats, SUGGEST_MODE, figure_list,table_list, words_list, words_list_text, spaces_list
 
     if vp or scan:
         report = True
@@ -723,7 +724,7 @@ def dump_stats():
             verbose_print("        %s. Expected 'Table: %s.'" % (count, x))
 
     table_order = True
-    teble_prev = 0
+    table_prev = 0
 
     for x in range(0,len(table_list)):
         table_value = int(table_list[x])        
@@ -733,6 +734,15 @@ def dump_stats():
             table_order = False
 
     verbose_print("\n    Tables are numbered in sequence (Independent of missing or duplicate Tables): %s" % table_order)
+
+    duplicates = getDuplicatesWithCount(spaces_list)
+    verbose_print("\nRepetitive Spaces:")
+    verbose_print("-------------------")
+
+    count = 0
+    for key, value in duplicates.items():
+        count +=1
+        verbose_print("%s. Repetitive Spaces found: %s occurrences, Expected: 1 space, Found: %s spaces" % (count, value, key.count(' ')))
 
     verbose_print("\n%s" % line)
 
@@ -1370,7 +1380,7 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
     return text, text_only_doc
 
 def main():
-    global wrong_words, current_dir, final_dir_md, final_dir_bm, doc_lists, headless, files_map, urls_map, download_dir, bitmap_path_md, vp, scan, DOCUMENT_ID, DOCUMENT_TITLE, DOCUMENT_URL, SUGGEST_MODE, figure_list, doc_meta, doc_meta_dir
+    global wrong_words, current_dir, final_dir_md, final_dir_bm, doc_lists, headless, files_map, urls_map, download_dir, bitmap_path_md, vp, scan, DOCUMENT_ID, DOCUMENT_TITLE, DOCUMENT_URL, SUGGEST_MODE, figure_list, table_list, spaces_list, doc_meta, doc_meta_dir
 
     wrong_words = get_json_file(".","config.json")
 
@@ -1518,6 +1528,8 @@ def main():
     regex = r"(?<=[^\*\*]\*Table\s)\d{1,3}(?=\.)"
     table_list = re.findall(regex, md, re.MULTILINE)
 
+    regex = r"[ ]{2,}"
+    spaces_list = re.findall(regex, md, re.MULTILINE)
 
     scan4words(text_only_doc)
     dump_stats()
