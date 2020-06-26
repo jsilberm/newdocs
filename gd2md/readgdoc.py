@@ -118,6 +118,7 @@ words_list_text = []
 figure_list = []
 table_list =[]
 spaces_list = []
+nl_list = []
 
 table_counter = 0
 
@@ -530,7 +531,7 @@ def download_image(url):
     return name
 
 def dump_stats():
-    global table_counter, vp, report, scan, fonts_stats, image_stats, fonts_family_stats, SUGGEST_MODE, figure_list,table_list, words_list, words_list_text, spaces_list
+    global table_counter, vp, report, scan, fonts_stats, image_stats, fonts_family_stats, SUGGEST_MODE, figure_list,table_list, words_list, words_list_text, spaces_list, nl_list
 
     if vp or scan:
         report = True
@@ -735,20 +736,43 @@ def dump_stats():
 
     verbose_print("\n    Tables are numbered in sequence (Independent of missing or duplicate Tables): %s" % table_order)
 
-    duplicates = getDuplicatesWithCount(spaces_list)
+    duplicates = getOccurenses(spaces_list)
     verbose_print("\nRepetitive Spaces:")
     verbose_print("-------------------")
 
     count = 0
     for key, value in duplicates.items():
         count +=1
-        verbose_print("%s. Repetitive Spaces found: %s occurrences, Expected: 1 space, Found: %s spaces" % (count, value, key.count(' ')))
+        verbose_print("%s. Repetitive Spaces found: %s occurrences (Expected: 1), Found: %s" % (count, value, key.count(' ')))
+
+    duplicates = getOccurenses(nl_list)
+    verbose_print("\nRepetitive NewLine Characters:")
+    verbose_print("-------------------------------")
+
+    count = 0
+    for key, value in duplicates.items():
+        count +=1
+        verbose_print("%s. Repetitive NewLine found: %s occurrences (Expected: < 3), Found: %s" % (count, value, len(key)))
+
 
     verbose_print("\n%s" % line)
 
     report = False
 
     return True
+
+def getOccurenses(listOfElems):
+    ''' Get frequency count of duplicate elements in the given list '''
+    dictOfElems = dict()
+    # Iterate over each element in list
+    for elem in listOfElems:
+        # If element exists in dict then increment its value else add it in dict
+        if elem in dictOfElems:
+            dictOfElems[elem] += 1
+        else:
+            dictOfElems[elem] = 1    
+
+    return dictOfElems
 
 def getDuplicatesWithCount(listOfElems):
     ''' Get frequency count of duplicate elements in the given list '''
@@ -1289,6 +1313,7 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                         inlineObjectId = elem['inlineObjectElement']['inlineObjectId']
                         if 'imageProperties' in document.get('inlineObjects').get(inlineObjectId).get('inlineObjectProperties').get('embeddedObject'):
                             verbose_print('Reading Bitmap inline image')
+                            text_only_doc += '<IMAGE>'
                             if scan == False:
                                 url = document.get('inlineObjects').get(inlineObjectId).get('inlineObjectProperties').get('embeddedObject').get('imageProperties').get('contentUri')
                                 name = download_image(url)
@@ -1299,6 +1324,7 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                                 image_stats['bitmap'] += 1
                         else:
                             verbose_print('Reading Drawing inline image')
+                            text_only_doc += '<IMAGE>'                                
                             if scan == False:
                                 image_file = files_map[inlineObjectId]
                                 name = masage_image(image_file)
@@ -1339,6 +1365,7 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
             table_header = True
             table = value.get('table')
             if table['rows'] == 1 and table['columns'] == 1:
+                text_only_doc += '<TABLE_1x1_BEGIN>\n'
                 for row in table.get('tableRows'):
                     cells = row.get('tableCells')
                     for cell in cells:
@@ -1346,9 +1373,11 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                         cell_content, text_only_doc_tmp = read_strucutural_elements(document, cell_content_element, text, footnotes_text, True)
                         text += cell_content
                         text_only_doc += text_only_doc_tmp
+                text_only_doc += '<TABLE_1x1_END>\n'    
             else:
                 table_counter += 1
                 text += '<div class="p-table center"><div></div>\n\n'
+                text_only_doc += '<TABLE_BEGIN>\n'
                 for row in table.get('tableRows'):
                     cells = row.get('tableCells')
                     for cell in cells:
@@ -1357,6 +1386,7 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                         cell_content = cell_content.rstrip()
                         cell_content = cell_content.replace('\n', '<br>')  
                         text += "| " + cell_content + " "
+                        text_only_doc += text_only_doc_tmp
 
                     text += "|\n"
 
@@ -1367,6 +1397,7 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                         for x in range(0,columns):
                             text += ' --- |'
                 text += '\n</div>\n'
+                text_only_doc += '<TABLE_END>\n'
 
         elif 'tableOfContents' in value:
             verbose_print("Ignoring pageBreak")       
@@ -1380,7 +1411,7 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
     return text, text_only_doc
 
 def main():
-    global wrong_words, current_dir, final_dir_md, final_dir_bm, doc_lists, headless, files_map, urls_map, download_dir, bitmap_path_md, vp, scan, DOCUMENT_ID, DOCUMENT_TITLE, DOCUMENT_URL, SUGGEST_MODE, figure_list, table_list, spaces_list, doc_meta, doc_meta_dir
+    global wrong_words, current_dir, final_dir_md, final_dir_bm, doc_lists, headless, files_map, urls_map, download_dir, bitmap_path_md, vp, scan, DOCUMENT_ID, DOCUMENT_TITLE, DOCUMENT_URL, SUGGEST_MODE, figure_list, table_list, spaces_list, nl_list, doc_meta, doc_meta_dir
 
     wrong_words = get_json_file(".","config.json")
 
@@ -1521,6 +1552,11 @@ def main():
 
         verbose_print("Final MD file: %s" % doc_title_name)
 
+    if False:
+        with open("/home/roger/git_mnt/final/result/raw_file.txt", 'w', encoding='utf-8') as f:
+            f.write(text_only_doc)
+        f.close()
+
     # Post Parsing
     regex = r"(?<=[^\*\*]\*Figure\s)\d{1,3}(?=\.)"
     figure_list = re.findall(regex, md, re.MULTILINE)
@@ -1529,7 +1565,10 @@ def main():
     table_list = re.findall(regex, md, re.MULTILINE)
 
     regex = r"[ ]{2,}"
-    spaces_list = re.findall(regex, md, re.MULTILINE)
+    spaces_list = re.findall(regex, text_only_doc, re.MULTILINE)
+
+    regex = r"[\n]{3,}"
+    nl_list = re.findall(regex, text_only_doc, re.MULTILINE)
 
     scan4words(text_only_doc)
     dump_stats()
