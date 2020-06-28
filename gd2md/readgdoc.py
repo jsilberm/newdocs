@@ -1303,6 +1303,9 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                         if ch == False and text_cache != '' and not text_cache.endswith('\n') and paragraph_style_namedStyleType != "NORMAL_TEXT":
                             text += '\n'
                         if ch == False:
+                            if paragraph_style_namedStyleType == 'HEADING_1':
+                                #change_2_new_mdfile
+                                print("** STOP **")
                             text += namedStyleType[paragraph_style_namedStyleType]
                     else:
                         print("Found unsopported namedStyleType", file=sys.stderr)
@@ -1400,9 +1403,11 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                 text_only_doc += '<TABLE_END>\n'
 
         elif 'tableOfContents' in value:
-            verbose_print("Ignoring pageBreak")       
+            verbose_print("Ignoring pageBreak")
+            text_only_doc += '<TOC>\n'     
         elif 'sectionBreak' in value:
             verbose_print("Ignoring sectionBreak")
+            text_only_doc += '<SECTION_BREAK>\n'
         else:
             verbose_print("Unkown Element Found... Please add to code")
 
