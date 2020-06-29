@@ -80,6 +80,8 @@ debug = False
 headless = False
 scan = False
 
+md_doc_global = ''
+
 username = "release@pensando.io"
 
 
@@ -217,6 +219,43 @@ css_def = (
     '   }\n'
     '</style>\n'
 )
+
+def clean_md_dict(md_dict):
+    global headings
+
+    new_dict = {}
+    count = 0
+    local_text = ""
+    pointer="MAIN"
+    pointer_table = pointer + '_table'
+    new_dict[pointer_table] = False
+    new_dict[pointer] = ''
+
+
+    for key, value in md_dict.items():
+        if not '_table' in key:
+            value = value.strip() + '\n'
+
+            if value.startswith(headings['HEADING_1']):
+                new_dict[pointer] = local_text
+                count += 1
+                pointer = '_index_' + str(count)
+                pointer_table = pointer + '_table'
+                new_dict[pointer_table] = False
+                new_dict[pointer] = ''
+
+                local_text = value
+            else:
+                local_text += value
+        else:
+
+            if value:
+                new_dict[pointer_table] = value
+    
+    new_dict[pointer] = local_text
+
+    return new_dict
+
 
 def get_json_file(location, filename_only):
     global wrong_words
@@ -1230,7 +1269,7 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
 
 
 def read_strucutural_elements(document, elements, current_text, current_footnotes_text, tblscsr):
-    global table_counter, para, namedStyleType, testStyle, Dcount, urls_map, fenced_flag, code_flag, bullet_flag, footnote_flag, nestinglevel,final_dir_bm, image_stats, scan
+    global md_doc_global, table_counter, para, namedStyleType, testStyle, Dcount, urls_map, fenced_flag, code_flag, bullet_flag, footnote_flag, nestinglevel,final_dir_bm, image_stats, scan
 
     """Recurses through a list of Structural Elements to read a document's text where text may be
         in nested elements.
@@ -1238,7 +1277,12 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
         Args:
             elements: a list of Structural Elements.
     """
-    text = ''
+    text = {}
+    md_index = 0
+    md_index_str = 'MAIN'
+    md_index_str_table = md_index_str + '_table'
+    text[md_index_str] = ''
+    text[md_index_str_table] = False
     text_only_doc = ''
     footnotes_text = ''
     listid = ''
@@ -1269,44 +1313,49 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                     text_content_raw = text_run.get('content')
 
                     if fenced_flag == True and not tblscsr and text_font_family != "Courier New":
-                        text += textStyle['fenced']['End']
+                        text[md_index_str] += textStyle['fenced']['End']
                         fenced_flag = False
     
                     if fenced_flag == False and code_flag and text_font_family != "Courier New":
                         if bullet_flag:
-                            text = add_end(text, textStyle['code']['End'])
+                            text[md_index_str] = add_end(text[md_index_str], textStyle['code']['End'])
                         else:
-                            text = add_end(text, textStyle['code']['End'])
+                            text[md_index_str] = add_end(text[md_index_str], textStyle['code']['End'])
                         code_flag = False
 
-                    if fenced_flag == False and code_flag and text_font_family == "Courier New" and text.endswith('\n'):
-                        last_code_index = text.rfind(textStyle['code']['Begin'])
-                        text = text[:last_code_index] + textStyle['fenced']['Begin'] + text[last_code_index+1:]
+                    if fenced_flag == False and code_flag and text_font_family == "Courier New" and text[md_index_str].endswith('\n'):
+                        last_code_index = text[md_index_str].rfind(textStyle['code']['Begin'])
+                        text[md_index_str] = text[md_index_str][:last_code_index] + textStyle['fenced']['Begin'] + text[md_index_str][last_code_index+1:]
                         code_flag = False
                         fenced_flag = True
 
                     if fenced_flag == False and code_flag ==False and bullet_flag and not 'bullet' in flags:
-                        text += '  \n'
+                        text[md_index_str] += '  \n'
                         bullet_flag = False
 
                     if para.alignment != "CENTER" and para.alignment_flag:
                         para.alignment_flag = False
-                        text += '</div>'
+                        text[md_index_str] += '</div>'
 
                 if tblscsr == False and paragraph_style_namedStyleType:
-                    text_cache = current_text + text
+                    text_cache = current_text + text[md_index_str]
                     ch = check_heading(text_cache)
 
                     if 'inlineObjectElement' in elem:
-                        text += '  \n'
+                        text[md_index_str] += '  \n'
                     elif paragraph_style_namedStyleType in namedStyleType:
                         if ch == False and text_cache != '' and not text_cache.endswith('\n') and paragraph_style_namedStyleType != "NORMAL_TEXT":
-                            text += '\n'
+                            text[md_index_str] += '\n'
                         if ch == False:
                             if paragraph_style_namedStyleType == 'HEADING_1':
-                                #change_2_new_mdfile
-                                print("** STOP **")
-                            text += namedStyleType[paragraph_style_namedStyleType]
+                                md_index +=1
+                                md_doc_global += text[md_index_str]
+                                md_index_str = '_index_' + str(md_index)
+                                md_index_str_table = md_index_str + '_table'
+                                text[md_index_str] = ""
+                                text[md_index_str_table] = False
+
+                            text[md_index_str] += namedStyleType[paragraph_style_namedStyleType]
                     else:
                         print("Found unsopported namedStyleType", file=sys.stderr)
                         sys.exit(0)
@@ -1320,9 +1369,9 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                             if scan == False:
                                 url = document.get('inlineObjects').get(inlineObjectId).get('inlineObjectProperties').get('embeddedObject').get('imageProperties').get('contentUri')
                                 name = download_image(url)
-                                if not text.endswith('\n'):
-                                    text += '\n'
-                                text += "![image alt text](" + bitmap_path_md + "/" + name + ")"
+                                if not text[md_index_str].endswith('\n'):
+                                    text[md_index_str] += '\n'
+                                text[md_index_str] += "![image alt text](" + bitmap_path_md + "/" + name + ")"
                             else:
                                 image_stats['bitmap'] += 1
                         else:
@@ -1331,9 +1380,9 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                             if scan == False:
                                 image_file = files_map[inlineObjectId]
                                 name = masage_image(image_file)
-                                if not text.endswith('\n'):
-                                    text += '\n'
-                                text += "![image alt text](" + bitmap_path_md + "/" + name + ")"
+                                if not text[md_index_str].endswith('\n'):
+                                    text[md_index_str] += '\n'
+                                text[md_index_str] += "![image alt text](" + bitmap_path_md + "/" + name + ")"
                             else:
                                 image_stats['drawing'] += 1
 
@@ -1342,25 +1391,25 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                     footnoteReference = elem['footnoteReference']
                     footnoteId = footnoteReference['footnoteId']
                     footnotenoteNumber = footnoteReference['footnoteNumber']
-                    text += '[^' + footnoteId + ']'
+                    text[md_index_str] += '[^' + footnoteId + ']'
                     footnote = footnotes[footnoteId]
                     flags += 'footnote'
                     footnote_flag = True
-                    text_tmp, text_only_doc_tmp = read_strucutural_elements(document, footnote, current_text, footnotes_text, False)
+                    text_tmp, text_only_doc_tmp, _ = read_strucutural_elements(document, footnote, current_text, footnotes_text, False)
                     footnote_flag = False
                     footnotes_text += '[^' + footnoteId + ']: ' + text_tmp.lstrip()
                     text_only_doc += text_only_doc_tmp
                 elif 'pageBreak' in elem:
                     verbose_print("Ignoring pageBreak")
                 else:
-                    text_tmp, rmtxt, text_only_doc_tmp = read_paragraph_element(elem, tblscsr, text, flags, listid)
+                    text_tmp, rmtxt, text_only_doc_tmp = read_paragraph_element(elem, tblscsr, text[md_index_str], flags, listid)
                     text_only_doc += text_only_doc_tmp
                     if rmtxt == None:
-                        text += text_tmp
+                        text[md_index_str] += text_tmp
                     else:
                         verbose_print("Removing Empty Header")
-                        text = text[:-rmtxt]
-                        text += text_tmp
+                        text[md_index_str] = text[md_index_str][:-rmtxt]
+                        text[md_index_str] += text_tmp
             
         elif 'table' in value:
             # The text in table cells are in nested Structural Elements and tables may be
@@ -1373,33 +1422,34 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                     cells = row.get('tableCells')
                     for cell in cells:
                         cell_content_element = cell.get('content')
-                        cell_content, text_only_doc_tmp = read_strucutural_elements(document, cell_content_element, text, footnotes_text, True)
-                        text += cell_content
+                        cell_content, text_only_doc_tmp, _ = read_strucutural_elements(document, cell_content_element, text[md_index_str], footnotes_text, True)
+                        text[md_index_str] += cell_content
                         text_only_doc += text_only_doc_tmp
                 text_only_doc += '<TABLE_1x1_END>\n'    
             else:
+                text[md_index_str_table] = True
                 table_counter += 1
-                text += '<div class="p-table center"><div></div>\n\n'
+                text[md_index_str] += '<div class="p-table center"><div></div>\n\n'
                 text_only_doc += '<TABLE_BEGIN>\n'
                 for row in table.get('tableRows'):
                     cells = row.get('tableCells')
                     for cell in cells:
                         cell_content_element = cell.get('content')
-                        cell_content, text_only_doc_tmp = read_strucutural_elements(document, cell_content_element, text, footnotes_text, False)
+                        cell_content, text_only_doc_tmp, _ = read_strucutural_elements(document, cell_content_element, text[md_index_str], footnotes_text, False)
                         cell_content = cell_content.rstrip()
                         cell_content = cell_content.replace('\n', '<br>')  
-                        text += "| " + cell_content + " "
+                        text[md_index_str] += "| " + cell_content + " "
                         text_only_doc += text_only_doc_tmp
 
-                    text += "|\n"
+                    text[md_index_str] += "|\n"
 
                     if table_header:
                         table_header = False
-                        text += "|"
+                        text[md_index_str] += "|"
                         columns = table.get('columns')
                         for x in range(0,columns):
-                            text += ' --- |'
-                text += '\n</div>\n'
+                            text[md_index_str] += ' --- |'
+                text[md_index_str] += '\n</div>\n'
                 text_only_doc += '<TABLE_END>\n'
 
         elif 'tableOfContents' in value:
@@ -1411,12 +1461,12 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
         else:
             verbose_print("Unkown Element Found... Please add to code")
 
-    text += '  \n  \n' + footnotes_text
+    text[md_index_str] += '  \n  \n' + footnotes_text
 
-    return text, text_only_doc
+    return text[md_index_str], text_only_doc, text
 
 def main():
-    global wrong_words, current_dir, final_dir_md, final_dir_bm, doc_lists, headless, files_map, urls_map, download_dir, bitmap_path_md, vp, scan, DOCUMENT_ID, DOCUMENT_TITLE, DOCUMENT_URL, SUGGEST_MODE, figure_list, table_list, spaces_list, nl_list, doc_meta, doc_meta_dir
+    global md_doc_global, wrong_words, current_dir, final_dir_md, final_dir_bm, doc_lists, headless, files_map, urls_map, download_dir, bitmap_path_md, vp, scan, DOCUMENT_ID, DOCUMENT_TITLE, DOCUMENT_URL, SUGGEST_MODE, figure_list, table_list, spaces_list, nl_list, doc_meta, doc_meta_dir
 
     wrong_words = get_json_file(".","config.json")
 
@@ -1459,7 +1509,7 @@ def main():
         sys.exit(0)
 
     if not os.path.exists(download_dir) and scan == False:
-        verbose_print("Creating %s folder for Chromium downloads (fixed location)" % download_dir)
+        verbose_print("Creating: %s folder for Chromium downloads (fixed location)" % download_dir)
         os.makedirs(download_dir)
 
     DOCUMENT_ID = args.id[0]
@@ -1473,6 +1523,18 @@ def main():
             bitmap_path_md = args.relative_path[0].rstrip('/')
         else:
             bitmap_path_md = final_dir_md
+
+        ## Add ../ if bitmap path given to us was relative, compensate for index folders ## 
+        if not bitmap_path_md.startswith('/'):
+            bitmap_path_md = '../' + bitmap_path_md
+
+        if not os.path.exists(final_dir_bm):
+            print("Error: Image destination given %s does not exist, exiting..." % final_dir_bm, file=sys.stderr)
+            exit (1)
+
+        if not os.path.exists(final_dir_md):
+            print("Error: MD file destination given %s does not exist, exiting..." % final_dir_md, file=sys.stderr)
+            exit (1)
 
     if scan == False and args.cache_enable == False:
         files_map, urls_map = parse_gdoc.parseDocument(DOCUMENT_URL, username, pwdfile, download_dir, headless, vp)
@@ -1526,8 +1588,8 @@ def main():
     document = service.documents().get(documentId=DOCUMENT_ID, suggestionsViewMode=SUGGEST_MODE).execute()
 
     DOCUMENT_TITLE = document.get('title')
-    doc_title_name = final_dir_md + "/" + DOCUMENT_TITLE.replace(' ', '_') + ".md"
-    doc_title_name_text_only = final_dir_md + "/" + DOCUMENT_TITLE.replace(' ', '_') + ".txt"
+    doc_title_name = DOCUMENT_TITLE.replace(' ', '_')
+    doc_title_name_text_only = DOCUMENT_TITLE.replace(' ', '_')
 
     verbose_print('Processing document: {}'.format(document.get('title')))
 
@@ -1542,20 +1604,78 @@ def main():
     populate_lists(doc_lists)
     populate_footnotes(doc_footnotes)
 
-    md, text_only_doc = read_strucutural_elements(document, doc_content, '', '', False)
+    md, text_only_doc, md_doc = read_strucutural_elements(document, doc_content, '', '', False)
 
-    md = css_def + md
+    ## Add last text to the global md file ##
+    md_doc_global += md
+
+    ## Strip any itmes with only NL and spaces, have to start with heading '##' to be kept ## 
+    md_doc = clean_md_dict(md_doc)
+
+    ## Add table to global md
+    md_doc_global = css_def + md_doc_global
 
     if scan == False:
-        with open(doc_title_name, 'w', encoding='utf-8') as f:
-            f.write(md)
+        md_path = final_dir_md + '/MD'
+        txt_path = final_dir_md + '/TXT'
+
+        if not os.path.exists(final_dir_md):
+            verbose_print("Creating %s folder for final md files" % final_dir_md)
+            os.makedirs(final_dir_md)
+        else:
+            verbose_print("Folder: %s exists, using it, will overwrite any existing files with same name" % final_dir_md)
+
+        if not os.path.exists(md_path):
+            verbose_print("Creating %s folder for final md file" % md_path)
+            os.makedirs(md_path)
+        else:
+            verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (md_path, doc_title_name_text_only))
+
+        local_name = md_path + '/' + doc_title_name + '.md'
+        verbose_print("Creating file: %s" % (local_name))
+        ## Writing the full MD file ##
+        with open(local_name, 'w', encoding='utf-8') as f:
+            f.write(md_doc_global)
         f.close()
 
-        with open(doc_title_name_text_only, 'w', encoding='utf-8') as f:
+        if not os.path.exists(txt_path):
+            verbose_print("Creating: %s folder for final txt file" % txt_path)
+            os.makedirs(txt_path)
+        else:
+            verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (txt_path, doc_title_name_text_only))
+
+        local_name = txt_path + '/' + doc_title_name_text_only + '.txt'
+        verbose_print("Creating file: %s" % (local_name))
+        ## Writing the full TXT file ##
+        with open(local_name , 'w', encoding='utf-8') as f:
             f.write(text_only_doc)
         f.close()
 
-        verbose_print("Final MD file: %s" % doc_title_name)
+        table_flag = False
+        for key, value in md_doc.items():
+            if '_table' in key:
+                table_flag = value
+            else:
+                idx_path = final_dir_md + '/' + doc_title_name + '_' + key
+                idx_filename = key + '.md'
+                if not os.path.exists(idx_path):
+                    verbose_print("Creating: %s folder for final md file" % idx_path)
+                    os.makedirs(idx_path)
+                else:
+                    verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (idx_path, idx_filename))
+
+                if table_flag:
+                    value = css_def + value
+                    table_flag = False
+                
+                local_name = idx_path + '/' + idx_filename
+                verbose_print("Creating file: %s" % (local_name))
+                ## Writing the full idx file ##
+                with open(local_name, 'w', encoding='utf-8') as f:
+                    f.write(value)
+                f.close()
+
+        verbose_print("Final MD folder: %s" % final_dir_md)
 
     if False:
         with open("/home/roger/git_mnt/final/result/raw_file.txt", 'w', encoding='utf-8') as f:

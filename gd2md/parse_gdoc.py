@@ -122,7 +122,7 @@ def parseDocument(url, username, pwdfile, download_path, headless, v_p):
     site.get(url)
     time.sleep(5)
 
-    verbose_print("Got to site...")
+    verbose_print("Got to the site...")
 
     #Username/Email
     if headless:
@@ -141,10 +141,13 @@ def parseDocument(url, username, pwdfile, download_path, headless, v_p):
 
     subm1=site.find_elements_by_xpath("//input[@type='submit' and @id='next' and @name='signIn' ]")
     subm2=site.find_elements_by_xpath("//div[@role='button' and @id='identifierNext']")
+    subm3=site.find_elements_by_xpath("//div[@id='identifierNext']//div[@role='button']//span[contains(text(), 'Next')]")
     if len(subm1) > 0:
         subm = subm1[0]
     elif len(subm2) > 0:
         subm = subm2[0]
+    elif len(subm3) > 0:
+        subm = subm3[0]
     else:
         print("Error: Could not locate username submit button, exiting...", file=sys.stderr)
 
@@ -172,15 +175,21 @@ def parseDocument(url, username, pwdfile, download_path, headless, v_p):
         fld = fld2[0]
     else:
         print("Error: Could not locate password field, exiting...", file=sys.stderr)
+        exit(1)
 
     subm1=site.find_elements_by_xpath("//input[@type='submit' and @id='submit']")
     subm2=site.find_elements_by_xpath("//div[@role='button' and @id='passwordNext']")
+    subm3=site.find_elements_by_xpath("//div[@id='passwordNext']//div[@role='button']//span[contains(text(), 'Next')]")
+
     if len(subm1) > 0:
         subm = subm1[0]
     elif len(subm2) > 0:
         subm = subm2[0]
+    elif len(subm3) > 0:
+        subm = subm3[0]        
     else:
         print("Error: Could not locate password submit button, exiting...", file=sys.stderr)
+        exit(1)
 
     pwd = get_pwd(pwdfile)
     fld.send_keys(pwd)
