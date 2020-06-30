@@ -1085,8 +1085,8 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
     # Obsolited, replaced with scan4words
     # look4words(text_content_raw, text_font_family)
 
-    #if 'Kind or Tag (arbitrary' in text_content_raw:
-    #    print("Stop")
+    if 'PSM Enterprise Edition Design Best Practice' in text_content_raw:
+        print("Stop")
 
     if font_size_prev != None:
         if font_size_prev != text_font_size and len(raw_text) > 0 and len(text_content) > 0:
@@ -1242,6 +1242,12 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
             text_local += '<div style="text-align:center">'
 
         if bullet_flag and ((current_text + text_local).endswith('\n')):
+
+            if '\n' in text_local:
+                text_local = text_local.rstrip() + '\n'
+            else:
+                current_text = current_text.rstrip() + '\n'
+
             list_type = lists[listid]
 
             if list_type == 'bullet_list':
@@ -1290,8 +1296,6 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
             for key in text_textStyle:
                 if text_textStyle[key] == True and key in textStyle:
                     text_local += textStyle[key]['Begin']
-                    if bullet_flag:
-                        text_local = text_local.rstrip()
                     list_local.append(key)
         
         idx = find_lindent(text_content)
@@ -1310,8 +1314,7 @@ def read_paragraph_element(element, tblscsr, current_text, flags, listid):
 
         for key in reversed(list_local):
             text_local = add_end(text_local, textStyle[key]['End'])
-            if bullet_flag:
-                text_local = text_local.rstrip()
+
 
         #idx = find_rindent(text_local)
         if text_font_end:
