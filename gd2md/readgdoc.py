@@ -220,6 +220,41 @@ css_def = (
     '</style>\n'
 )
 
+def change_filename_characters(local_text):
+
+    local_text = local_text.replace(' ', '_')
+    local_text = local_text.replace(':','-')
+    local_text = local_text.replace('/','-')
+    local_text = local_text.replace('\\','-')
+    local_text = local_text.replace('*','-')
+    local_text = local_text.replace('?','-')
+    local_text = local_text.replace('<','(')
+    local_text = local_text.replace('>',')')
+    local_text = local_text.replace('[','(')
+    local_text = local_text.replace(']',')')
+    local_text = local_text.replace('{','(')
+    local_text = local_text.replace('}',')')
+    local_text = local_text.replace('|','-')
+    local_text = local_text.replace('"',"'")
+    local_text = local_text.replace('&',"and")
+    local_text = local_text.replace('%',"-")
+    local_text = local_text.replace('$',"-")
+    local_text = local_text.replace('~',"-")
+    local_text = local_text.replace('+',"-")
+    local_text = local_text.replace('=',"-")
+    local_text = local_text.replace(';',"-")
+    local_text = local_text.replace('`',"-")
+    local_text = local_text.replace('^',"-")
+
+    while '__' in local_text:
+        local_text = local_text.replace('__','_')
+
+    while '--' in local_text:
+        local_text = local_text.replace('--','-')
+
+    return local_text
+
+
 def clean_md_dict(md_dict):
     global headings
 
@@ -251,7 +286,7 @@ def clean_md_dict(md_dict):
                         print("Error: Post Processing, could not locate header.", file=sys.stderr)
                         exit (1)
 
-                    new_dict[pointer]['name'] = header_list[0].replace(' ', '_').replace(':','').replace('__','_')
+                    new_dict[pointer]['name'] = change_filename_characters(header_list[0])
 
                     regex = r"(?<=\!\[image alt text\]\().+(?=\))"
                     header_list = re.findall(regex, local_text, re.MULTILINE)
@@ -277,7 +312,8 @@ def clean_md_dict(md_dict):
     if len(header_list) == 0:
         print("Error: Post Processing, could not locate header.", file=sys.stderr)
         exit (1)
-    new_dict[pointer]['name'] = header_list[0].replace(' ', '_').replace(':','').replace('__','_')
+
+    new_dict[pointer]['name'] = change_filename_characters(header_list[0])
 
     regex = r"(?<=\!\[image alt text\]\().+(?=\))"
     header_list = re.findall(regex, local_text, re.MULTILINE)
