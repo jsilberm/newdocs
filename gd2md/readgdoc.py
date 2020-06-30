@@ -227,9 +227,7 @@ def clean_md_dict(md_dict):
     count = 0
     local_text = ""
     pointer="MAIN"
-    pointer_table = pointer + '_table'
-    new_dict[pointer_table] = False
-    new_dict[pointer] = ''
+    new_dict[pointer] = {'table': False, 'name': '', 'text': '', 'images': {}}
 
 
     for key, value in md_dict.items():
@@ -237,12 +235,33 @@ def clean_md_dict(md_dict):
             value = value.strip() + '\n'
 
             if value.startswith(headings['HEADING_1']):
-                new_dict[pointer] = local_text
+                new_dict[pointer]['text'] = local_text
+
+                if 'MAIN' == pointer:
+                    new_dict[pointer]['name'] = 'Main'
+
+                    regex = r"(?<=\!\[image alt text\]\().+(?=\))"
+                    header_list = re.findall(regex, local_text, re.MULTILINE)
+                    if len(header_list) > 0:
+                        new_dict[pointer]['images'] = header_list                    
+                else:
+                    regex = r"(?<=[#]{2}\s).+?(?=\n)"
+                    header_list = re.findall(regex, local_text, re.MULTILINE)
+                    if len(header_list) == 0:
+                        print("Error: Post Processing, could not locate header.", file=sys.stderr)
+                        exit (1)
+
+                    new_dict[pointer]['name'] = header_list[0].replace(' ', '_').replace(':','').replace('__','_')
+
+                    regex = r"(?<=\!\[image alt text\]\().+(?=\))"
+                    header_list = re.findall(regex, local_text, re.MULTILINE)
+                    if len(header_list) > 0:
+                        new_dict[pointer]['images'] = header_list
+
+
                 count += 1
                 pointer = '_index_' + str(count)
-                pointer_table = pointer + '_table'
-                new_dict[pointer_table] = False
-                new_dict[pointer] = ''
+                new_dict[pointer] = {'table': False, 'name': '', 'text': '', 'images': {}}
 
                 local_text = value
             else:
@@ -250,9 +269,20 @@ def clean_md_dict(md_dict):
         else:
 
             if value:
-                new_dict[pointer_table] = value
+                new_dict[pointer]['table'] = value
     
-    new_dict[pointer] = local_text
+    new_dict[pointer]['text'] = local_text
+    regex = r"(?<=[#]{2}\s).+?(?=\n)"
+    header_list = re.findall(regex, local_text, re.MULTILINE)
+    if len(header_list) == 0:
+        print("Error: Post Processing, could not locate header.", file=sys.stderr)
+        exit (1)
+    new_dict[pointer]['name'] = header_list[0].replace(' ', '_').replace(':','').replace('__','_')
+
+    regex = r"(?<=\!\[image alt text\]\().+(?=\))"
+    header_list = re.findall(regex, local_text, re.MULTILINE)
+    if len(header_list) > 0:
+        new_dict[pointer]['images'] = header_list
 
     return new_dict
 
@@ -1520,7 +1550,7 @@ def main():
         final_dir_md = args.doc_destination[0].rstrip('/')
         
         if 'relative_path' in args and args.relative_path != None:
-            bitmap_path_md = args.relative_path[0].rstrip('/')
+            bitmap_path_md = '../' + args.relative_path[0].rstrip('/')
         else:
             bitmap_path_md = final_dir_md
 
@@ -1625,19 +1655,6 @@ def main():
         else:
             verbose_print("Folder: %s exists, using it, will overwrite any existing files with same name" % final_dir_md)
 
-        if not os.path.exists(md_path):
-            verbose_print("Creating %s folder for final md file" % md_path)
-            os.makedirs(md_path)
-        else:
-            verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (md_path, doc_title_name_text_only))
-
-        local_name = md_path + '/' + doc_title_name + '.md'
-        verbose_print("Creating file: %s" % (local_name))
-        ## Writing the full MD file ##
-        with open(local_name, 'w', encoding='utf-8') as f:
-            f.write(md_doc_global)
-        f.close()
-
         if not os.path.exists(txt_path):
             verbose_print("Creating: %s folder for final txt file" % txt_path)
             os.makedirs(txt_path)
@@ -1646,41 +1663,73 @@ def main():
 
         local_name = txt_path + '/' + doc_title_name_text_only + '.txt'
         verbose_print("Creating file: %s" % (local_name))
+
         ## Writing the full TXT file ##
         with open(local_name , 'w', encoding='utf-8') as f:
             f.write(text_only_doc)
         f.close()
 
-        table_flag = False
         for key, value in md_doc.items():
-            if '_table' in key:
-                table_flag = value
-            else:
-                idx_path = final_dir_md + '/' + doc_title_name + '_' + key
+                idx_path = final_dir_md + '/' + value['name']
                 idx_filename = key + '.md'
+                img_path = final_dir_bm + '/' + value['name']
+
+                pwd_path = os.getcwd()
+                verbose_print("My working dir is: %s" % pwd_path)
+
                 if not os.path.exists(idx_path):
                     verbose_print("Creating: %s folder for final md file" % idx_path)
                     os.makedirs(idx_path)
                 else:
                     verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (idx_path, idx_filename))
 
-                if table_flag:
-                    value = css_def + value
-                    table_flag = False
+                if not os.path.exists(img_path):
+                    verbose_print("Creating: %s folder for the images for Heading: %s" % (img_path, value['name']))
+                    os.makedirs(img_path)
+                else:
+                    verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name" % idx_path)
+
+
+                if value['table']:
+                    value['text'] = css_def + value['text']
                 
                 local_name = idx_path + '/' + idx_filename
+                for iname in value['images']:
+                    iname_basename = os.path.basename(iname)
+                    iname_path = os.path.dirname(iname)
+                    iname_new = iname_path + '/' + value['name'] + '/' + iname_basename
+                    iname_current = final_dir_bm + '/' + iname_basename
+                    iname_new_absoule = img_path + '/' + iname_basename
+
+                    if os.path.isfile(iname_new_absoule):
+                        verbose_print("Removing file: %s " % iname_new_absoule)
+                        os.remove(iname_new_absoule)
+                    verbose_print("Moving file: %s to %s" % (iname_current, iname_new_absoule))
+                    os.rename(iname_current, iname_new_absoule)
+                    value['text'] = value['text'].replace(iname, iname_new)
+                    md_doc_global = md_doc_global.replace(iname, iname_new)
+
                 verbose_print("Creating file: %s" % (local_name))
                 ## Writing the full idx file ##
                 with open(local_name, 'w', encoding='utf-8') as f:
-                    f.write(value)
+                    f.write(value['text'])
                 f.close()
 
-        verbose_print("Final MD folder: %s" % final_dir_md)
+        if not os.path.exists(md_path):
+            verbose_print("Creating %s folder for final md file" % md_path)
+            os.makedirs(md_path)
+        else:
+            verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (md_path, doc_title_name_text_only))
 
-    if False:
-        with open("/home/roger/git_mnt/final/result/raw_file.txt", 'w', encoding='utf-8') as f:
-            f.write(text_only_doc)
+
+        local_name = md_path + '/' + doc_title_name + '.md'
+        verbose_print("Creating file: %s" % (local_name))
+        ## Writing the full MD file ##
+        with open(local_name, 'w', encoding='utf-8') as f:
+            f.write(md_doc_global)
         f.close()
+
+        verbose_print("Final MD folder: %s" % final_dir_md)
 
     # Post Parsing
     regex = r"(?<=[^\*\*]\*Figure\s)\d{1,3}(?=\.)"
