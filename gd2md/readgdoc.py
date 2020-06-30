@@ -85,7 +85,8 @@ md_doc_global = ''
 username = "release@pensando.io"
 
 
-home_dir = os.path.expanduser('~')
+# home_dir = os.path.expanduser('~')
+home_dir = "/usr/tmp"
 pwdfile = home_dir + "/.gdocs"
 download_dir = home_dir + "/Downloads"
 current_dir = os.getcwd()

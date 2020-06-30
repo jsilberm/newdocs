@@ -1,7 +1,6 @@
 FROM ubuntu:18.04
-WORKDIR /root
-COPY . .
-COPY .gdocs .
+WORKDIR /home/release
+COPY requirements.txt config.json parse_gdoc.py readgdoc.py ./
 RUN mkdir Downloads Downloads/result
 
 RUN apt-get update
