@@ -43,6 +43,11 @@ To scan the doc and get report only:
 
 To build : ` docker build -t gd2md:latest .`
 
-To run container as daemon: `docker run --rm -d -v `pwd`:/root gd2md`
+To run container as daemon (Ex:): 
+```
+DOCDIR=/home/jeff/docs/content/psm/v1.8.0-E
+IMGDIR=/home/jeff/docs/static/images/PSM
+docker run -d --rm -u `id -u`:`id -g` -v $DOCDIR:/tmp/docs -v $IMGDIR:/tmp/bitmaps gd2md
+```
 
 To enter running container: docker exec -it `docker ps | grep gd2md| awk '{print $1}'` bash
