@@ -85,8 +85,6 @@ md_doc_global = ''
 username = "release@pensando.io"
 
 
-#home_dir = os.path.expanduser('~')
-#home_dir = "/usr/tmp"
 home_dir = os.environ['HOME']
 pwdfile = home_dir + "/.gdocs"
 download_dir = home_dir + "/Downloads"
@@ -1594,10 +1592,6 @@ def main():
             bitmap_path_md = args.relative_path[0].rstrip('/')
         else:
             bitmap_path_md = final_dir_md
-
-        ## Add ../ if bitmap path given to us was relative, compensate for index folders ## 
-        #if not bitmap_path_md.startswith('/') and '':
-        #    bitmap_path_md = '../' + bitmap_path_md
 
         if not os.path.exists(final_dir_bm):
             print("Error: Image destination given %s does not exist, exiting..." % final_dir_bm, file=sys.stderr)

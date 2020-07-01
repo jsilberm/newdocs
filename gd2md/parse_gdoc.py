@@ -15,9 +15,7 @@ import sys
 text_cache = None
 vp = False
 
-#download_dir = os.path.expanduser('~') + "/Downloads"
-#download_dir = "/usr/tmp/Downloads"
-download_dir = os.environ['HOME']
+download_dir = os.environ['HOME'] + "/Downloads"
 
 def verbose_print(text, dedupe=True):
     global vp, text_cache
