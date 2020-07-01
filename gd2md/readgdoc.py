@@ -254,15 +254,28 @@ def change_filename_characters(local_text):
 
     return local_text
 
+def get_hugo_header(title, categories, weight):
+    header = '---\n'
+    header += 'title: ' + title + '\n'
+    header += 'menu:\n'
+    header += '  main:\n'
+    header += 'weight: -' + str(weight + 1) + '\n'
+    header += 'categories: ' + categories + '\n'
+    header += 'toc: true\n'
+    header += '---\n'
+
+    return header
 
 def clean_md_dict(md_dict):
-    global headings
+    global headings, doc_meta
 
     new_dict = {}
     count = 0
     local_text = ""
     pointer="MAIN"
-    new_dict[pointer] = {'table': False, 'name': '', 'text': '', 'images': {}}
+    categories = ''
+
+    new_dict[pointer] = {'table': False, 'name': '', 'text': '', 'hugo_header': '', 'images': {}}
 
 
     for key, value in md_dict.items():
@@ -272,8 +285,12 @@ def clean_md_dict(md_dict):
             if value.startswith(headings['HEADING_1']):
                 new_dict[pointer]['text'] = local_text
 
+                if 'categories' in doc_meta and doc_meta['categories'] != '':
+                    categories = doc_meta['categories']
+
                 if 'MAIN' == pointer:
                     new_dict[pointer]['name'] = 'Main'
+                    new_dict[pointer]['hugo_header'] = get_hugo_header('Main', categories, count)
 
                     regex = r"(?<=\!\[image alt text\]\().+(?=\))"
                     header_list = re.findall(regex, local_text, re.MULTILINE)
@@ -287,6 +304,8 @@ def clean_md_dict(md_dict):
                         exit (1)
 
                     new_dict[pointer]['name'] = change_filename_characters(header_list[0])
+         
+                    new_dict[pointer]['hugo_header'] = get_hugo_header(header_list[0], categories, count)
 
                     regex = r"(?<=\!\[image alt text\]\().+(?=\))"
                     header_list = re.findall(regex, local_text, re.MULTILINE)
@@ -296,7 +315,7 @@ def clean_md_dict(md_dict):
 
                 count += 1
                 pointer = '_index_' + str(count)
-                new_dict[pointer] = {'table': False, 'name': '', 'text': '', 'images': {}}
+                new_dict[pointer] = {'table': False, 'name': '', 'text': '', 'hugo_header': '', 'images': {}}
 
                 local_text = value
             else:
@@ -314,6 +333,12 @@ def clean_md_dict(md_dict):
         exit (1)
 
     new_dict[pointer]['name'] = change_filename_characters(header_list[0])
+
+    if 'categories' in doc_meta and doc_meta['categories'] != '':
+        categories = doc_meta['categories']
+
+    new_dict[pointer]['hugo_header'] = get_hugo_header(header_list[0], categories, count)
+
 
     regex = r"(?<=\!\[image alt text\]\().+(?=\))"
     header_list = re.findall(regex, local_text, re.MULTILINE)
@@ -625,23 +650,23 @@ def get_image(url, retries, wait):
             response.raise_for_status()
     
         except requests.exceptions.HTTPError as errh:
-            verbose_print("Http Error: %s",errh)
+            verbose_print("Http Error: %s" % str(errh))
 
         except requests.exceptions.ConnectionError as errc:
-            verbose_print("Error Connecting: %s",errc)
+            verbose_print("Error Connecting: %s" % str(errc))
 
         except requests.exceptions.Timeout as errt:
-            verbose_print("Timeout Error: %s",errt)
+            verbose_print("Timeout Error: %s" % str(errt))
 
         except requests.exceptions.RequestException as err:
-            verbose_print("Something happend on google side, could not get image: %s",err)
+            verbose_print("Something happend on google side, could not get image: %s" % str(err))
 
         if response.status_code == requests.codes.ok:
             count = retries
         else:
             count += 1
             if count < retries:
-                verbose_print("Waiting 5 sec, attempt %s of %s", (count, retries))
+                verbose_print("Waiting 5 sec, attempt %s of %s" % (str(count), str(retries)))
                 time.sleep(5)
             else:
                 print("Error: Giving up on image, exiting...", file=sys.stderr) 
@@ -1753,9 +1778,10 @@ def main():
                 else:
                     verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name" % idx_path)
 
-
                 if value['table']:
                     value['text'] = css_def + value['text']
+
+                value['text'] = value['hugo_header'] + value['text']
                 
                 local_name = idx_path + '/' + idx_filename
                 for iname in value['images']:
