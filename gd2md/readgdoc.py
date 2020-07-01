@@ -259,7 +259,7 @@ def get_hugo_header(title, categories, weight):
     header += 'title: ' + title + '\n'
     header += 'menu:\n'
     header += '  main:\n'
-    header += 'weight: -' + str(weight + 1) + '\n'
+    header += 'weight: ' + str(weight + 1) + '\n'
     header += 'categories: ' + categories + '\n'
     header += 'toc: true\n'
     header += '---\n'
