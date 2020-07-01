@@ -256,7 +256,7 @@ def change_filename_characters(local_text):
 
 def get_hugo_header(title, categories, weight):
     header = '---\n'
-    header += 'title: ' + title + '\n'
+    header += 'title: "' + title + '"\n'
     header += 'menu:\n'
     header += '  main:\n'
     header += 'weight: ' + str(weight + 1) + '\n'
