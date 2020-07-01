@@ -616,17 +616,46 @@ def masage_image(filename):
         img.save(final_dir_bm + "/" + name)
     return name
 
+def get_image(url, retries, wait):
+
+    count = 0
+    while count < retries:
+        try:
+            response = requests.get(url, timeout=wait)
+            response.raise_for_status()
+    
+        except requests.exceptions.HTTPError as errh:
+            verbose_print("Http Error: %s",errh)
+
+        except requests.exceptions.ConnectionError as errc:
+            verbose_print("Error Connecting: %s",errc)
+
+        except requests.exceptions.Timeout as errt:
+            verbose_print("Timeout Error: %s",errt)
+
+        except requests.exceptions.RequestException as err:
+            verbose_print("Something happend on google side, could not get image: %s",err)
+
+        if response.status_code == requests.codes.ok:
+            count = retries
+        else:
+            count += 1
+            if count < retries:
+                verbose_print("Waiting 5 sec, attempt %s of %s", (count, retries))
+                time.sleep(5)
+            else:
+                print("Error: Giving up on image, exiting...", file=sys.stderr) 
+                exit(1)
+
+    return response
+
+
 def download_image(url):
     global image_stats, final_dir_bm, scan
 
     image_stats['bitmap'] += 1
 
-    response = requests.get(url, timeout=8.0)
-    if response.status_code != requests.codes.ok:
-        time.sleep(5)
-        response = requests.get(url, timeout=8.0)
-        if response.status_code != requests.codes.ok:
-            assert False, 'Status code error: {}.'.format(response.status_code)
+    response = get_image(url, 3, 8.0)
     
     img = Image.open(BytesIO(response.content))
     sha1_value = sha1(imgage2string(img))
