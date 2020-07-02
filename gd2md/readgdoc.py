@@ -254,27 +254,39 @@ def change_filename_characters(local_text):
 
     return local_text
 
-def get_hugo_header(title, categories, weight):
+def get_hugo_header(header_title, categories, weight, doc_title):
+
+    header_title = header_title.replace('_', ' ')   
+    while '  ' in header_title:
+        header_title = header_title.replace('  ',' ')
+
+    doc_title = doc_title.replace('_', ' ')   
+    while '  ' in doc_title:
+        doc_title = doc_title.replace('  ',' ')
+
     header = '---\n'
-    header += 'title: "' + title + '"\n'
+    header += 'title: "' + header_title + '"\n'
     header += 'menu:\n'
-    header += '  main:\n'
+    header += '  docs:\n'
+    header += '    parent: "' + doc_title + '"\n'
     header += 'weight: ' + str(weight + 1) + '\n'
-    header += 'categories: ' + categories + '\n'
+    if categories != '':
+        header += 'categories: ' + categories + '\n'
     header += 'toc: true\n'
     header += '---\n'
 
     return header
 
 def clean_md_dict(md_dict):
-    global headings, doc_meta
+    global headings, doc_meta, DOCUMENT_TITLE
 
     new_dict = {}
     count = 0
     local_text = ""
     pointer="MAIN"
     categories = ''
-
+    doc_title = DOCUMENT_TITLE
+    
     new_dict[pointer] = {'table': False, 'name': '', 'text': '', 'hugo_header': '', 'images': {}}
 
 
@@ -288,11 +300,14 @@ def clean_md_dict(md_dict):
                 if 'categories' in doc_meta and doc_meta['categories'] != '':
                     categories = doc_meta['categories']
 
+                if 'parent' in doc_meta and doc_meta['parent'] != '':
+                    doc_title = doc_meta['parent']
+                
                 if 'MAIN' == pointer:
                     new_dict[pointer]['name'] = 'Main'
-                    new_dict[pointer]['hugo_header'] = get_hugo_header('Main', categories, count)
+                    new_dict[pointer]['hugo_header'] = get_hugo_header('Main', categories, count, doc_title)
 
-                    regex = r"(?<=\!\[image alt text\]\().+(?=\))"
+                    regex = r"(?<=\!\[image alt text\]\().+?(?=\))"
                     header_list = re.findall(regex, local_text, re.MULTILINE)
                     if len(header_list) > 0:
                         new_dict[pointer]['images'] = header_list                    
@@ -305,9 +320,9 @@ def clean_md_dict(md_dict):
 
                     new_dict[pointer]['name'] = change_filename_characters(header_list[0])
          
-                    new_dict[pointer]['hugo_header'] = get_hugo_header(header_list[0], categories, count)
+                    new_dict[pointer]['hugo_header'] = get_hugo_header(header_list[0], categories, count, doc_title)
 
-                    regex = r"(?<=\!\[image alt text\]\().+(?=\))"
+                    regex = r"(?<=\!\[image alt text\]\().+?(?=\))"
                     header_list = re.findall(regex, local_text, re.MULTILINE)
                     if len(header_list) > 0:
                         new_dict[pointer]['images'] = header_list
@@ -337,10 +352,10 @@ def clean_md_dict(md_dict):
     if 'categories' in doc_meta and doc_meta['categories'] != '':
         categories = doc_meta['categories']
 
-    new_dict[pointer]['hugo_header'] = get_hugo_header(header_list[0], categories, count)
+    new_dict[pointer]['hugo_header'] = get_hugo_header(header_list[0], categories, count, doc_title)
 
 
-    regex = r"(?<=\!\[image alt text\]\().+(?=\))"
+    regex = r"(?<=\!\[image alt text\]\().+?(?=\))"
     header_list = re.findall(regex, local_text, re.MULTILINE)
     if len(header_list) > 0:
         new_dict[pointer]['images'] = header_list
