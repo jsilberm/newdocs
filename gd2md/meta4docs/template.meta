@@ -1,5 +1,6 @@
 {
-	"categories": "[]",
+	"categories": "[<lables>]",
+	"parent": "<Name insted of title>",
 	"figuresGroup": 
 	{
 		"<Figure #>": <int, Number of occurences>
