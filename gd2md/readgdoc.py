@@ -1657,8 +1657,8 @@ def main():
         final_dir_bm = args.bitmap_destination[0].rstrip('/')
         final_dir_md = args.doc_destination[0].rstrip('/')
         
-        if 'relative_path' in args and args.relative_path != None:
-            bitmap_path_md = args.relative_path[0].rstrip('/')
+        if 'reference_path' in args and args.reference_path != None:
+            bitmap_path_md = args.reference_path[0].rstrip('/')
         else:
             bitmap_path_md = final_dir_md
 
@@ -1876,7 +1876,7 @@ if __name__ == '__main__':
     parser_a.add_argument('-f', '--full_docset', action='store_true', help='Generates the Main, MD and TXT folders')
     parser_a.add_argument('-i', '--id', required=True, nargs=1, help='Google Doc ID', metavar="")
     parser_a.add_argument('-m', '--meta_ignore', action='store_true', help='Ignores any metafile associated with this doc.')
-    parser_a.add_argument('-r', '--relative_path', nargs=1, help='Relative path to images, used in md file, if obitted bitmap_destination is used', metavar="")
+    parser_b.add_argument('-r', '--reference_path', nargs=1, help='Relative or Absolute path to images, used in md file, if obitted bitmap_destination is used', metavar="")
     parser_a.add_argument('-v', '--verbose', action='store_true', help='Verbose text and with Screenshots')
     parser_a.add_argument('-w', '--write_cache', action='store_true', help='Stores the map liks to current dir, after successful run, needed by -c flag')
     add_syntax_inclusion(parser_name, "id,bitmap_destination, doc_destination")
@@ -1891,7 +1891,7 @@ if __name__ == '__main__':
     parser_b.add_argument('-f', '--full_docset', action='store_true', help='Generates the Main, MD and TXT folders')
     parser_b.add_argument('-i', '--id',required=True, nargs=1, help='Google Doc ID', metavar="")
     parser_b.add_argument('-m', '--meta_ignore', action='store_true', help='Ignores any metafile associated with this doc.')
-    parser_b.add_argument('-r', '--reference_path', nargs=1, help='Relative or Absolut path to images, used in md file, if obitted bitmap_destination is used', metavar="")
+    parser_b.add_argument('-r', '--reference_path', nargs=1, help='Relative or Absolute path to images, used in md file, if obitted bitmap_destination is used', metavar="")
     parser_b.add_argument('-v', '--verbose', action='store_true', help='Verbose text')
     parser_b.add_argument('-w', '--write_cache', action='store_true', help='Stores the map liks to current dir, after successful run, needed by -c flag')
     add_syntax_inclusion(parser_name, "id,bitmap_destination, doc_destination")
