@@ -41,6 +41,8 @@ To scan the doc and get report only:
 
 # Running as Container
 
+Make sure `.gdocs` is in `$PWD` and contains the password for the `release` user.
+
 To build : ` docker build -t gd2md:latest .`
 
 To run container as daemon (Ex:): 
