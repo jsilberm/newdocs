@@ -286,7 +286,7 @@ def clean_md_dict(md_dict):
     pointer="MAIN"
     categories = ''
     doc_title = DOCUMENT_TITLE
-    
+
     new_dict[pointer] = {'table': False, 'name': '', 'text': '', 'hugo_header': '', 'images': {}}
 
 
@@ -1750,28 +1750,32 @@ def main():
     md_doc_global = css_def + md_doc_global
 
     if scan == False:
-        md_path = final_dir_md + '/MD'
-        txt_path = final_dir_md + '/TXT'
 
-        if not os.path.exists(final_dir_md):
-            verbose_print("Creating %s folder for final md files" % final_dir_md)
-            os.makedirs(final_dir_md)
-        else:
-            verbose_print("Folder: %s exists, using it, will overwrite any existing files with same name" % final_dir_md)
 
-        if not os.path.exists(txt_path):
-            verbose_print("Creating: %s folder for final txt file" % txt_path)
-            os.makedirs(txt_path)
-        else:
-            verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (txt_path, doc_title_name_text_only))
+        if args.full_docset:
+            md_path = final_dir_md + '/MD'
+            txt_path = final_dir_md + '/TXT'
 
-        local_name = txt_path + '/' + doc_title_name_text_only + '.txt'
-        verbose_print("Creating file: %s" % (local_name))
+            if not os.path.exists(final_dir_md):
+                verbose_print("Creating %s folder for final md files" % final_dir_md)
+                os.makedirs(final_dir_md)
+            else:
+                verbose_print("Folder: %s exists, using it, will overwrite any existing files with same name" % final_dir_md)
 
-        ## Writing the full TXT file ##
-        with open(local_name , 'w', encoding='utf-8') as f:
-            f.write(text_only_doc)
-        f.close()
+
+            if not os.path.exists(txt_path):
+                verbose_print("Creating: %s folder for final txt file" % txt_path)
+                os.makedirs(txt_path)
+            else:
+                verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (txt_path, doc_title_name_text_only))
+
+            local_name = txt_path + '/' + doc_title_name_text_only + '.txt'
+            verbose_print("Creating file: %s" % (local_name))
+
+            ## Writing the full TXT file ##
+            with open(local_name , 'w', encoding='utf-8') as f:
+                f.write(text_only_doc)
+            f.close()
 
         for key, value in md_doc.items():
                 idx_path = final_dir_md + '/' + value['name']
@@ -1781,58 +1785,59 @@ def main():
                 pwd_path = os.getcwd()
                 verbose_print("My working dir is: %s" % pwd_path)
 
-                if not os.path.exists(idx_path):
-                    verbose_print("Creating: %s folder for final md file" % idx_path)
-                    os.makedirs(idx_path)
-                else:
-                    verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (idx_path, idx_filename))
+                if not value['name'] == 'Main' or args.full_docset:
+                    if not os.path.exists(idx_path):
+                        verbose_print("Creating: %s folder for final md file" % idx_path)
+                        os.makedirs(idx_path)
+                    else:
+                        verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (idx_path, idx_filename))
 
-                if not os.path.exists(img_path):
-                    verbose_print("Creating: %s folder for the images for Heading: %s" % (img_path, value['name']))
-                    os.makedirs(img_path)
-                else:
-                    verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name" % idx_path)
+                    if not os.path.exists(img_path):
+                        verbose_print("Creating: %s folder for the images for Heading: %s" % (img_path, value['name']))
+                        os.makedirs(img_path)
+                    else:
+                        verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name" % idx_path)
 
-                if value['table']:
-                    value['text'] = css_def + value['text']
+                    if value['table']:
+                        value['text'] = css_def + value['text']
 
-                value['text'] = value['hugo_header'] + value['text']
-                
-                local_name = idx_path + '/' + idx_filename
-                for iname in value['images']:
-                    iname_basename = os.path.basename(iname)
-                    iname_path = os.path.dirname(iname)
-                    iname_new = iname_path + '/' + value['name'] + '/' + iname_basename
-                    iname_current = final_dir_bm + '/' + iname_basename
-                    iname_new_absoule = img_path + '/' + iname_basename
+                    value['text'] = value['hugo_header'] + value['text']
+                    
+                    local_name = idx_path + '/' + idx_filename
+                    for iname in value['images']:
+                        iname_basename = os.path.basename(iname)
+                        iname_path = os.path.dirname(iname)
+                        iname_new = iname_path + '/' + value['name'] + '/' + iname_basename
+                        iname_current = final_dir_bm + '/' + iname_basename
+                        iname_new_absoule = img_path + '/' + iname_basename
 
-                    if os.path.isfile(iname_new_absoule):
-                        verbose_print("Removing file: %s " % iname_new_absoule)
-                        os.remove(iname_new_absoule)
-                    verbose_print("Moving file: %s to %s" % (iname_current, iname_new_absoule))
-                    os.rename(iname_current, iname_new_absoule)
-                    value['text'] = value['text'].replace(iname, iname_new)
-                    md_doc_global = md_doc_global.replace(iname, iname_new)
+                        if os.path.isfile(iname_new_absoule):
+                            verbose_print("Removing file: %s " % iname_new_absoule)
+                            os.remove(iname_new_absoule)
+                        verbose_print("Moving file: %s to %s" % (iname_current, iname_new_absoule))
+                        os.rename(iname_current, iname_new_absoule)
+                        value['text'] = value['text'].replace(iname, iname_new)
+                        md_doc_global = md_doc_global.replace(iname, iname_new)
 
-                verbose_print("Creating file: %s" % (local_name))
-                ## Writing the full idx file ##
-                with open(local_name, 'w', encoding='utf-8') as f:
-                    f.write(value['text'])
-                f.close()
+                    verbose_print("Creating file: %s" % (local_name))
+                    ## Writing the full idx file ##
+                    with open(local_name, 'w', encoding='utf-8') as f:
+                        f.write(value['text'])
+                    f.close()
+        if args.full_docset:
+            if not os.path.exists(md_path):
+                verbose_print("Creating %s folder for final md file" % md_path)
+                os.makedirs(md_path)
+            else:
+                verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (md_path, doc_title_name_text_only))
 
-        if not os.path.exists(md_path):
-            verbose_print("Creating %s folder for final md file" % md_path)
-            os.makedirs(md_path)
-        else:
-            verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (md_path, doc_title_name_text_only))
 
-
-        local_name = md_path + '/' + doc_title_name + '.md'
-        verbose_print("Creating file: %s" % (local_name))
-        ## Writing the full MD file ##
-        with open(local_name, 'w', encoding='utf-8') as f:
-            f.write(md_doc_global)
-        f.close()
+            local_name = md_path + '/' + doc_title_name + '.md'
+            verbose_print("Creating file: %s" % (local_name))
+            ## Writing the full MD file ##
+            with open(local_name, 'w', encoding='utf-8') as f:
+                f.write(md_doc_global)
+            f.close()
 
         verbose_print("Final MD folder: %s" % final_dir_md)
 
@@ -1868,6 +1873,7 @@ if __name__ == '__main__':
     parser_a.add_argument('-b', '--bitmap_destination', required=True, nargs=1, help='<Destination folder for bitmap images>', metavar="")
     parser_a.add_argument('-c', '--cache_enable', action='store_true', help='Use cache files created by -w flag')
     parser_a.add_argument('-d', '--doc_destination',required=True, nargs=1, help='<Destination folder for MD document>', metavar="")
+    parser_a.add_argument('-f', '--full_docset', action='store_true', help='Generates the Main, MD and TXT folders')
     parser_a.add_argument('-i', '--id', required=True, nargs=1, help='Google Doc ID', metavar="")
     parser_a.add_argument('-m', '--meta_ignore', action='store_true', help='Ignores any metafile associated with this doc.')
     parser_a.add_argument('-r', '--relative_path', nargs=1, help='Relative path to images, used in md file, if obitted bitmap_destination is used', metavar="")
@@ -1882,6 +1888,7 @@ if __name__ == '__main__':
     parser_b.add_argument('-b', '--bitmap_destination', required=True, nargs=1, help='<Destination folder for bitmap images>', metavar="")
     parser_b.add_argument('-c', '--cache_enable', action='store_true', help='Use cache files created by -w flag')
     parser_b.add_argument('-d', '--doc_destination',required=True, nargs=1, help='<Destination folder for MD document>', metavar="")
+    parser_b.add_argument('-f', '--full_docset', action='store_true', help='Generates the Main, MD and TXT folders')
     parser_b.add_argument('-i', '--id',required=True, nargs=1, help='Google Doc ID', metavar="")
     parser_b.add_argument('-m', '--meta_ignore', action='store_true', help='Ignores any metafile associated with this doc.')
     parser_b.add_argument('-r', '--relative_path', nargs=1, help='Relative path to images, used in md file, if obitted bitmap_destination is used', metavar="")
