@@ -1891,7 +1891,7 @@ if __name__ == '__main__':
     parser_b.add_argument('-f', '--full_docset', action='store_true', help='Generates the Main, MD and TXT folders')
     parser_b.add_argument('-i', '--id',required=True, nargs=1, help='Google Doc ID', metavar="")
     parser_b.add_argument('-m', '--meta_ignore', action='store_true', help='Ignores any metafile associated with this doc.')
-    parser_b.add_argument('-r', '--relative_path', nargs=1, help='Relative path to images, used in md file, if obitted bitmap_destination is used', metavar="")
+    parser_b.add_argument('-r', '--reference_path', nargs=1, help='Relative or Absolut path to images, used in md file, if obitted bitmap_destination is used', metavar="")
     parser_b.add_argument('-v', '--verbose', action='store_true', help='Verbose text')
     parser_b.add_argument('-w', '--write_cache', action='store_true', help='Stores the map liks to current dir, after successful run, needed by -c flag')
     add_syntax_inclusion(parser_name, "id,bitmap_destination, doc_destination")
