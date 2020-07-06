@@ -1,6 +1,7 @@
 {
 	"categories": "[<lables>]",
 	"parent": "<Name insted of title>",
+	"hugo_split": "True | False",
 	"figuresGroup": 
 	{
 		"<Figure #>": <int, Number of occurences>

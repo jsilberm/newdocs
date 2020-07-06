@@ -22,7 +22,6 @@ import unicodedata
 import re
 
 
-
 ###################################################################################################################################
 #
 #
@@ -62,6 +61,7 @@ import re
 # ./readgdoc scan -i <Document ID>
 #
 ###################################################################################################################################
+
 
 class Paragraph:
     def __init__(self):
@@ -121,6 +121,7 @@ figure_list = []
 table_list =[]
 spaces_list = []
 nl_list = []
+issues_headers = {}
 
 table_counter = 0
 
@@ -220,6 +221,41 @@ css_def = (
     '</style>\n'
 )
 
+def fix_illigal_headers(local_text, local_illigal_headers):
+    
+    for value in local_illigal_headers:
+        if '</div>\n' in value:
+            local_text = local_text.replace(value, '</div>\n\n')
+        else:
+            local_text = local_text.replace(value, '\n\n')
+
+    return local_text
+
+def get_illigal_headers(local_text, title, searchtext):
+    global issues_headers
+
+    new_dict = {}
+    issues_headers[title] = {'illigal_text': '', 'pre_illigal_text': ''}
+
+    regex = r"(#+\s*(\W|</div>)\n)"
+    illigal_text = [m[0] for m in re.findall(regex, local_text)]
+    issues_headers[title]['illigal_text'] = illigal_text
+    illigal_pos = [m.start() for m in re.finditer(regex, local_text)]
+
+    pretext_offset = len(searchtext)
+    local_text_tmp = searchtext + local_text
+    before_text_tmp = []
+    before_txt = []
+    for pos in illigal_pos:
+        before_text_tmp.append(local_text_tmp[max(pretext_offset + pos-60,0):pretext_offset + pos])
+        text_tmp = local_text[max(pos-60,0):pos]
+        before_txt.append(text_tmp)
+
+    issues_headers[title]['pre_illigal_text'] = before_text_tmp
+    new_dict = dict(zip(illigal_text,before_txt))
+
+    return new_dict
+
 def change_filename_characters(local_text):
 
     local_text = local_text.replace(' ', '_')
@@ -267,18 +303,24 @@ def get_hugo_header(header_title, categories, weight, doc_title):
     header = '---\n'
     header += 'title: "' + header_title + '"\n'
     header += 'menu:\n'
-    header += '  docs:\n'
-    header += '    parent: "' + doc_title + '"\n'
+    if not doc_title == '':
+        header += '  docs:\n'
+        header += '    parent: "' + doc_title + '"\n'
+    else:
+        header += '  main:\n'
     header += 'weight: ' + str(weight + 1) + '\n'
     if categories != '':
         header += 'categories: ' + categories + '\n'
     header += 'toc: true\n'
     header += '---\n'
 
-    return header
+    return header, header_title
 
 def clean_md_dict(md_dict):
     global headings, doc_meta, DOCUMENT_TITLE
+
+
+    md_dict = handle_bad_headers(md_dict)
 
     new_dict = {}
     count = 0
@@ -287,7 +329,7 @@ def clean_md_dict(md_dict):
     categories = ''
     doc_title = DOCUMENT_TITLE
 
-    new_dict[pointer] = {'table': False, 'name': '', 'text': '', 'hugo_header': '', 'images': {}}
+    new_dict[pointer] = {'table': False, 'name': '','doc_title': '','categoris': '', 'title': '', 'text': '', 'hugo_header': '', 'images': {}}
 
 
     for key, value in md_dict.items():
@@ -305,7 +347,9 @@ def clean_md_dict(md_dict):
                 
                 if 'MAIN' == pointer:
                     new_dict[pointer]['name'] = 'Main'
-                    new_dict[pointer]['hugo_header'] = get_hugo_header('Main', categories, count, doc_title)
+                    new_dict[pointer]['doc_title'] = doc_title
+                    new_dict[pointer]['categoris'] = categories
+                    new_dict[pointer]['hugo_header'], new_dict[pointer]['title'] = get_hugo_header('Main', categories, count, doc_title)
 
                     regex = r"(?<=\!\[image alt text\]\().+?(?=\))"
                     header_list = re.findall(regex, local_text, re.MULTILINE)
@@ -319,8 +363,9 @@ def clean_md_dict(md_dict):
                         exit (1)
 
                     new_dict[pointer]['name'] = change_filename_characters(header_list[0])
-         
-                    new_dict[pointer]['hugo_header'] = get_hugo_header(header_list[0], categories, count, doc_title)
+                    new_dict[pointer]['doc_title'] = doc_title
+                    new_dict[pointer]['categoris'] = categories         
+                    new_dict[pointer]['hugo_header'], new_dict[pointer]['title'] = get_hugo_header(header_list[0], categories, count, doc_title)
 
                     regex = r"(?<=\!\[image alt text\]\().+?(?=\))"
                     header_list = re.findall(regex, local_text, re.MULTILINE)
@@ -330,7 +375,7 @@ def clean_md_dict(md_dict):
 
                 count += 1
                 pointer = '_index_' + str(count)
-                new_dict[pointer] = {'table': False, 'name': '', 'text': '', 'hugo_header': '', 'images': {}}
+                new_dict[pointer] = {'table': False, 'name': '','doc_title': '','categoris': '', 'title': '', 'text': '', 'hugo_header': '', 'images': {}}
 
                 local_text = value
             else:
@@ -348,11 +393,13 @@ def clean_md_dict(md_dict):
         exit (1)
 
     new_dict[pointer]['name'] = change_filename_characters(header_list[0])
+    new_dict[pointer]['doc_title'] = doc_title
+    new_dict[pointer]['categoris'] = categories
 
     if 'categories' in doc_meta and doc_meta['categories'] != '':
         categories = doc_meta['categories']
 
-    new_dict[pointer]['hugo_header'] = get_hugo_header(header_list[0], categories, count, doc_title)
+    new_dict[pointer]['hugo_header'], new_dict[pointer]['title'] = get_hugo_header(header_list[0], categories, count, doc_title)
 
 
     regex = r"(?<=\!\[image alt text\]\().+?(?=\))"
@@ -362,6 +409,78 @@ def clean_md_dict(md_dict):
 
     return new_dict
 
+def handle_bad_headers(local_dict):
+
+    new_dict = {}
+    prev_key = ''
+    searchtext = ''
+    for key, value in local_dict.items():
+        if not '_table' in key:
+            searchtext += value
+            illigal_headers = get_illigal_headers(value, key, searchtext)
+            if len(illigal_headers) > 0 or value.startswith('\n'):
+                value = fix_illigal_headers(value, illigal_headers)
+                if not prev_key == '':
+                    new_dict[prev_key] += value
+                    new_dict[prev_key + '_table'] = new_dict[prev_key + '_table'] | local_dict[key + '_table']
+                else:
+                    prev_key = key
+            else:
+                new_dict[key] = value
+                prev_key = key
+        else:
+            if not 'MAIN' in key:
+                tmp_list = key.split('_')
+                if '_index_' + tmp_list[2] in new_dict:
+                    new_dict[key] = value
+            else:
+                new_dict[key] = value
+    
+    fix_issues_headers(new_dict)
+
+    return compact_dict(new_dict)
+
+def fix_issues_headers(local_dict):
+    global issues_headers
+
+    issues_headers_tmp = {}
+
+    local_pointer = "MAIN"
+    for key, value in issues_headers.items():
+        if key in local_dict:
+            local_pointer = key
+            issues_headers_tmp[local_pointer] = issues_headers[local_pointer]
+        else:
+            issues_headers_tmp[local_pointer]['illigal_text'].extend(issues_headers[key]['illigal_text'])
+            issues_headers_tmp[local_pointer]['pre_illigal_text'].extend(issues_headers[key]['pre_illigal_text'])
+
+    issues_headers = issues_headers_tmp
+
+    return True
+
+def compact_dict(local_dict):
+    global issues_headers
+
+    issues_headers_tmp = {}
+    new_dict = {}
+    index_counter = 0 
+    for key, value in local_dict.items():
+        if 'MAIN' in key:
+            new_dict[key] = value
+
+            if not '_table' in key:
+                issues_headers_tmp[key] = issues_headers[key]
+        else:
+            if not '_table' in key:
+                index_counter +=1
+                new_dict['_index_' + str(index_counter)] = value
+                issues_headers_tmp['_index_' + str(index_counter)] = issues_headers[key]
+            else:
+                new_dict['_index_' + str(index_counter) + '_table'] = value
+
+    issues_headers = issues_headers_tmp
+
+    return new_dict
 
 def get_json_file(location, filename_only):
     global wrong_words
@@ -705,7 +824,7 @@ def download_image(url):
     return name
 
 def dump_stats():
-    global table_counter, vp, report, scan, fonts_stats, image_stats, fonts_family_stats, SUGGEST_MODE, figure_list,table_list, words_list, words_list_text, spaces_list, nl_list
+    global issues_headers, table_counter, vp, report, scan, fonts_stats, image_stats, fonts_family_stats, SUGGEST_MODE, figure_list,table_list, words_list, words_list_text, spaces_list, nl_list
 
     if vp or scan:
         report = True
@@ -927,6 +1046,15 @@ def dump_stats():
     for key, value in duplicates.items():
         count +=1
         verbose_print("%s. Repetitive NewLine found: %s occurrences (Expected: < 3), Found: %s" % (count, value, len(key)))
+
+    verbose_print("\nEmpty headers:")
+    verbose_print("---------------")
+    count = 0
+    for key, value in issues_headers.items():
+        for x in range(len(value['pre_illigal_text'])):
+            count += 1
+            pre_illigal_text = clean_string(value['pre_illigal_text'][x])
+            verbose_print("%s. Near (Ignore MD format) '%s'" % (count, pre_illigal_text))            
 
 
     verbose_print("\n%s" % line)
@@ -1591,6 +1719,13 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                 text_only_doc += '<TABLE_END>\n'
 
         elif 'tableOfContents' in value:
+            ## Remove contents if exist in _index1
+            if md_index_str == '_index_1':
+                text[md_index_str] = text[md_index_str].replace("\n\n<font size=\'2\'>**Contents**\n</font>\n\n", '\n\n')
+                text[md_index_str] = text[md_index_str].replace("<font size=\'2\'>**Contents**\n</font>\n\n", '')
+                text[md_index_str] = text[md_index_str].replace("\n\n<font size=\'2\'>Contents\n</font>\n\n", '\n\n')
+                text[md_index_str] = text[md_index_str].replace("<font size=\'2\'>Contents\n</font>\n\n", '')
+
             verbose_print("Ignoring pageBreak")
             text_only_doc += '<TOC>\n'     
         elif 'sectionBreak' in value:
@@ -1604,7 +1739,7 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
     return text[md_index_str], text_only_doc, text
 
 def main():
-    global md_doc_global, wrong_words, current_dir, final_dir_md, final_dir_bm, doc_lists, headless, files_map, urls_map, download_dir, bitmap_path_md, vp, scan, DOCUMENT_ID, DOCUMENT_TITLE, DOCUMENT_URL, SUGGEST_MODE, figure_list, table_list, spaces_list, nl_list, doc_meta, doc_meta_dir
+    global issues_headers, md_doc_global, wrong_words, current_dir, final_dir_md, final_dir_bm, doc_lists, headless, files_map, urls_map, download_dir, bitmap_path_md, vp, scan, DOCUMENT_ID, DOCUMENT_TITLE, DOCUMENT_URL, SUGGEST_MODE, figure_list, table_list, spaces_list, nl_list, doc_meta, doc_meta_dir
 
     wrong_words = get_json_file(".","config.json")
 
@@ -1684,10 +1819,10 @@ def main():
         for key, value in urls_map.items():
             verbose_print("urls_map['%s'] = '%s'" % (key, value))
 
-    if 'meta_ignore' in args and args.meta_ignore == False:
-        doc_meta_result = get_doc_meta(DOCUMENT_ID)
-        if doc_meta_result != False:
-            doc_meta = doc_meta_result
+
+    doc_meta_result = get_doc_meta(DOCUMENT_ID)
+    if doc_meta_result != False:
+        doc_meta = doc_meta_result
 
     """Shows basic usage of the Docs API.
     Prints the title of a sample document.
@@ -1746,22 +1881,27 @@ def main():
     ## Strip any itmes with only NL and spaces, have to start with heading '##' to be kept ## 
     md_doc = clean_md_dict(md_doc)
 
+    ## reconstruct md_doc_global from clean dict
+    md_doc_global = ''
+    for key, value in md_doc.items():
+        md_doc_global += md_doc[key]['text']
+
     ## Add table to global md
     md_doc_global = css_def + md_doc_global
 
     if scan == False:
 
+        ns_path = final_dir_md + '/' + doc_title_name
+        md_path = final_dir_md + '/MD'
+        txt_path = final_dir_md + '/TXT'
+
+        if not os.path.exists(final_dir_md):
+            verbose_print("Creating %s folder for final md files" % final_dir_md)
+            os.makedirs(final_dir_md)
+        else:
+            verbose_print("Folder: %s exists, using it, will overwrite any existing files with same name" % final_dir_md)
 
         if args.full_docset:
-            md_path = final_dir_md + '/MD'
-            txt_path = final_dir_md + '/TXT'
-
-            if not os.path.exists(final_dir_md):
-                verbose_print("Creating %s folder for final md files" % final_dir_md)
-                os.makedirs(final_dir_md)
-            else:
-                verbose_print("Folder: %s exists, using it, will overwrite any existing files with same name" % final_dir_md)
-
 
             if not os.path.exists(txt_path):
                 verbose_print("Creating: %s folder for final txt file" % txt_path)
@@ -1777,7 +1917,8 @@ def main():
                 f.write(text_only_doc)
             f.close()
 
-        for key, value in md_doc.items():
+        if (not 'hugo_split' in doc_meta) or ('hugo_split' in doc_meta and doc_meta['hugo_split'] == "True"):
+            for key, value in md_doc.items():
                 idx_path = final_dir_md + '/' + value['name']
                 idx_filename = key + '.md'
                 img_path = final_dir_bm + '/' + value['name']
@@ -1819,20 +1960,67 @@ def main():
                         value['text'] = value['text'].replace(iname, iname_new)
                         md_doc_global = md_doc_global.replace(iname, iname_new)
 
+
                     verbose_print("Creating file: %s" % (local_name))
                     ## Writing the full idx file ##
                     with open(local_name, 'w', encoding='utf-8') as f:
                         f.write(value['text'])
                     f.close()
+        else:
+            img_path = final_dir_bm + '/' + doc_title_name
+            if not os.path.exists(img_path):
+                verbose_print("Creating: %s folder for the images" % (img_path))
+                os.makedirs(img_path)
+            else:
+                verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name" % (img_path))
+
+            table_flag = False
+            for key, value in md_doc.items():
+                if value['table']:
+                    table_flag = True
+
+                for iname in value['images']:
+                        iname_basename = os.path.basename(iname)
+                        iname_path = os.path.dirname(iname)
+                        iname_new = iname_path + '/' + doc_title_name + '/' + iname_basename
+                        iname_current = final_dir_bm + '/' + iname_basename
+                        iname_new_absoule = img_path + '/' + iname_basename
+
+                        if os.path.isfile(iname_new_absoule):
+                            verbose_print("Removing file: %s " % iname_new_absoule)
+                            os.remove(iname_new_absoule)
+                        verbose_print("Moving file: %s to %s" % (iname_current, iname_new_absoule))
+                        os.rename(iname_current, iname_new_absoule)
+                        md_doc_global = md_doc_global.replace(iname, iname_new)
+                
+            if table_flag:
+                md_doc_global = css_def + md_doc_global
+
+            hugoheader,_ = get_hugo_header(md_doc['MAIN']['doc_title'], md_doc['MAIN']['categoris'], 0, '' )
+            md_doc_global = hugoheader + md_doc_global
+
+            local_name = ns_path + '/_index_1.md'
+            if not os.path.exists(ns_path):
+                verbose_print("Creating %s folder for final md file" % ns_path)
+                os.makedirs(ns_path)
+            else:
+                verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (ns_path, '_index_1'))
+
+            verbose_print("Creating file: %s" % (local_name))
+            ## Writing the full MD file ##
+            with open(local_name, 'w', encoding='utf-8') as f:
+                f.write(md_doc_global)
+            f.close()
+
         if args.full_docset:
+            local_name = md_path + '/' + doc_title_name + '.md'
+
             if not os.path.exists(md_path):
                 verbose_print("Creating %s folder for final md file" % md_path)
                 os.makedirs(md_path)
             else:
-                verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (md_path, doc_title_name_text_only))
+                verbose_print("Folder: %s exists, using it, will overwrite any existing file with same name: %s" % (md_path, local_name))
 
-
-            local_name = md_path + '/' + doc_title_name + '.md'
             verbose_print("Creating file: %s" % (local_name))
             ## Writing the full MD file ##
             with open(local_name, 'w', encoding='utf-8') as f:
@@ -1875,8 +2063,7 @@ if __name__ == '__main__':
     parser_a.add_argument('-d', '--doc_destination',required=True, nargs=1, help='<Destination folder for MD document>', metavar="")
     parser_a.add_argument('-f', '--full_docset', action='store_true', help='Generates the Main, MD and TXT folders')
     parser_a.add_argument('-i', '--id', required=True, nargs=1, help='Google Doc ID', metavar="")
-    parser_a.add_argument('-m', '--meta_ignore', action='store_true', help='Ignores any metafile associated with this doc.')
-    parser_b.add_argument('-r', '--reference_path', nargs=1, help='Relative or Absolute path to images, used in md file, if obitted bitmap_destination is used', metavar="")
+    parser_a.add_argument('-r', '--reference_path', nargs=1, help='Relative or Absolute path to images, used in md file, if obitted bitmap_destination is used', metavar="")
     parser_a.add_argument('-v', '--verbose', action='store_true', help='Verbose text and with Screenshots')
     parser_a.add_argument('-w', '--write_cache', action='store_true', help='Stores the map liks to current dir, after successful run, needed by -c flag')
     add_syntax_inclusion(parser_name, "id,bitmap_destination, doc_destination")
@@ -1890,7 +2077,6 @@ if __name__ == '__main__':
     parser_b.add_argument('-d', '--doc_destination',required=True, nargs=1, help='<Destination folder for MD document>', metavar="")
     parser_b.add_argument('-f', '--full_docset', action='store_true', help='Generates the Main, MD and TXT folders')
     parser_b.add_argument('-i', '--id',required=True, nargs=1, help='Google Doc ID', metavar="")
-    parser_b.add_argument('-m', '--meta_ignore', action='store_true', help='Ignores any metafile associated with this doc.')
     parser_b.add_argument('-r', '--reference_path', nargs=1, help='Relative or Absolute path to images, used in md file, if obitted bitmap_destination is used', metavar="")
     parser_b.add_argument('-v', '--verbose', action='store_true', help='Verbose text')
     parser_b.add_argument('-w', '--write_cache', action='store_true', help='Stores the map liks to current dir, after successful run, needed by -c flag')
