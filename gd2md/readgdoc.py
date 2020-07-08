@@ -223,6 +223,7 @@ css_def = (
 
 def fix_illigal_headers(local_text, local_illigal_headers):
     
+    local_text = local_text.lstrip()
     for value in local_illigal_headers:
         if '</div>\n' in value:
             local_text = local_text.replace(value, '</div>\n\n')
@@ -424,6 +425,7 @@ def handle_bad_headers(local_dict):
                     new_dict[prev_key] += value
                     new_dict[prev_key + '_table'] = new_dict[prev_key + '_table'] | local_dict[key + '_table']
                 else:
+                    new_dict[key] = value
                     prev_key = key
             else:
                 new_dict[key] = value
