@@ -1883,14 +1883,6 @@ def main():
     ## Strip any itmes with only NL and spaces, have to start with heading '##' to be kept ## 
     md_doc = clean_md_dict(md_doc)
 
-    ## reconstruct md_doc_global from clean dict
-    md_doc_global = ''
-    for key, value in md_doc.items():
-        md_doc_global += md_doc[key]['text']
-
-    ## Add table to global md
-    md_doc_global = css_def + md_doc_global
-
     if scan == False:
 
         ns_path = final_dir_md + '/' + doc_title_name
@@ -1919,7 +1911,16 @@ def main():
                 f.write(text_only_doc)
             f.close()
 
-        if (not 'hugo_split' in doc_meta) or ('hugo_split' in doc_meta and doc_meta['hugo_split'] == "True"):
+        if 'hugo_split' in doc_meta and doc_meta['hugo_split'] == "True":
+
+            ## reconstruct md_doc_global from clean dict
+            md_doc_global = ''
+            for key, value in md_doc.items():
+                md_doc_global += md_doc[key]['text']
+
+            ## Add table to global md
+            md_doc_global = css_def + md_doc_global
+
             for key, value in md_doc.items():
                 idx_path = final_dir_md + '/' + value['name']
                 idx_filename = key + '.md'
@@ -1969,6 +1970,15 @@ def main():
                         f.write(value['text'])
                     f.close()
         else:
+            ## reconstruct md_doc_global from clean dict
+            md_doc_global = ''
+            for key, value in md_doc.items():
+                if not 'MAIN' in key:
+                    md_doc_global += md_doc[key]['text']
+
+            ## Add table to global md
+            md_doc_global = css_def + md_doc_global
+
             img_path = final_dir_bm + '/' + doc_title_name
             if not os.path.exists(img_path):
                 verbose_print("Creating: %s folder for the images" % (img_path))
@@ -1991,10 +2001,15 @@ def main():
                         if os.path.isfile(iname_new_absoule):
                             verbose_print("Removing file: %s " % iname_new_absoule)
                             os.remove(iname_new_absoule)
-                        verbose_print("Moving file: %s to %s" % (iname_current, iname_new_absoule))
-                        os.rename(iname_current, iname_new_absoule)
-                        md_doc_global = md_doc_global.replace(iname, iname_new)
-                
+
+                        if not 'MAIN' in key:
+                            verbose_print("Moving file: %s to %s" % (iname_current, iname_new_absoule))
+                            os.rename(iname_current, iname_new_absoule)
+                            md_doc_global = md_doc_global.replace(iname, iname_new)
+                        else:
+                            verbose_print("Removing image, belongs to MAIN: %s" % (iname_current))
+                            os.remove(iname_current)
+
             if table_flag:
                 md_doc_global = css_def + md_doc_global
 
