@@ -1695,12 +1695,17 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                         text_only_doc += text_only_doc_tmp
                 text_only_doc += '<TABLE_1x1_END>\n'    
             else:
+                y=-1
+                tablearray = []
+
                 text[md_index_str_table] = True
                 table_counter += 1
                 text[md_index_str] += '<div class="p-table center"><div></div>\n\n'
                 text_only_doc += '<TABLE_BEGIN>\n'
                 for row in table.get('tableRows'):
                     cells = row.get('tableCells')
+                    tablearray.append([])
+                    y += 1
                     for cell in cells:
                         cell_content_element = cell.get('content')
                         cell_content, text_only_doc_tmp, _ = read_strucutural_elements(document, cell_content_element, text[md_index_str], footnotes_text, False)
@@ -1708,6 +1713,7 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                         cell_content = cell_content.replace('\n', '<br>')  
                         text[md_index_str] += "| " + cell_content + " "
                         text_only_doc += text_only_doc_tmp
+                        tablearray[y].append(text_only_doc_tmp.strip())
 
                     text[md_index_str] += "|\n"
 
@@ -1717,6 +1723,7 @@ def read_strucutural_elements(document, elements, current_text, current_footnote
                         columns = table.get('columns')
                         for x in range(0,columns):
                             text[md_index_str] += ' --- |'
+                        text[md_index_str] += '\n'
                 text[md_index_str] += '\n</div>\n'
                 text_only_doc += '<TABLE_END>\n'
 
