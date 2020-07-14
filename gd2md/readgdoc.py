@@ -1979,9 +1979,6 @@ def main():
                 if not 'MAIN' in key:
                     md_doc_global += md_doc[key]['text']
 
-            ## Add table to global md
-            md_doc_global = css_def + md_doc_global
-
             img_path = final_dir_bm + '/' + doc_title_name
             if not os.path.exists(img_path):
                 verbose_print("Creating: %s folder for the images" % (img_path))
