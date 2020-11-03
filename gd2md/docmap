@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+import os
+
+docs = [ { "name": "PSM_User_Guide","dirbase": "/Users/jeff/docs/content/psm", "imgdirbase": "/Users/jeff/docs/content/psm/images" , "docID": "1MUYMOptgsOCg_2h8Rnv4GGsrDeOugmYAq9wbuGedGVQ" } ,
+        { "name": "PSM_Best_Practice_Guide","dirbase": "/Users/jeff/docs/content/psm", "imgdirbase": "/Users/jeff/docs/content/psm/images" , "docID": "1ZpL3279aex4QKfparaOhGh9tmLnfHXAHEkvNiT92qM8" },
+        { "name": "ESXi_Release_Notes","dirbase": "/Users/jeff/docs/content/release_notes", "imgdirbase": "/Users/jeff/docs/content/release_notes/images" , "docID": "1iWtAhVQSDQvBTlvPDkWfKGpHY91PJVkr6W1udeSxEKM" },
+        { "name": "ESXi_Driver_Guide","dirbase": "/Users/jeff/docs/content/drivers", "imgdirbase": "/Users/jeff/docs/content/drivers/images" , "docID": "1S1i1KuCj0HFD8QYjzMMDi7CpuINxS-iu1YiSTA-dHIQ" },
+        { "name": "Linux_Release_Notes","dirbase": "/Users/jeff/docs/content/release_notes", "imgdirbase": "/Users/jeff/docs/content/release_notes/images" , "docID": "1d546JCDZGXRH7O1VWKtZcnnh5os4xQub5Xm4P_OIWFI" },
+        { "name": "Linux_Driver_Guide","dirbase": "/Users/jeff/docs/content/drivers", "imgdirbase": "/Users/jeff/docs/content/drivers/images" , "docID": "1B6EnYViIS8RRSEn7jBJ-5r1bp8SRhLAuNCSKcBTIeW0" },
+        { "name": "Windows_Release_Notes","dirbase": "/Users/jeff/docs/content/release_notes", "imgdirbase": "/Users/jeff/docs/content/release_notes/images" , "docID": "19GW-iCP0e7FkqgX3bZjgvc557rMqHJYQiQYM0iARfvE" },
+        { "name": "Windows_Driver_Guide","dirbase": "/Users/jeff/docs/content/drivers", "imgdirbase": "/Users/jeff/docs/content/drivers/images" , "docID" : "1BbdZMoDM7vSM37EG6yYUXIvjx1Ht44iFqpm_C315ZZY" },
+        { "name": "Platform_Release_Notes","dirbase": "/Users/jeff/docs/content/release_notes", "imgdirbase": "/Users/jeff/docs/content/release_notes/images" , "docID": "1osXyenXTnsj84p1eHum525KvZAcfYvspk2IxDAnRTR4" },
+        { "name": "DSC25_UserGuide","dirbase": "/Users/jeff/docs/content/dsc", "imgdirbase": "/Users/jeff/docs/content/dsc/images" , "docID": "1TTQbdyHFWmRsWRCy_u4R70c4aKMkXsI2SPg2dmquDdM" },
+        { "name": "DSC100_UserGuide","dirbase": "/Users/jeff/docs/content/dsc", "imgdirbase": "/Users/jeff/docs/content/dsc/images" , "docID" : "1SiJN8t-oeIo9ZbAxj3mgC47FRKX0sgHmzw8HEUUr7-c" }]
+
+for i in docs:
+     dir = i["dirbase"] + "/" + i["name"]
+     imgdir = i["imgdirbase"] + "/" + i["name"]
+     # print (i["name"], dir, imgdir, i["docID"] )
+     
+     if not os.path.exists(dir):
+             print ("Creating: ", dir)
+             os.makedirs(dir)
+     if not os.path.exists(imgdir):
+             print ("Creating: ", imgdir)
+             os.makedirs(imgdir)
+     cmd = "docker run -u `id -u`:`id -g` -v `pwd`:/home/release -v {}:/tmp/docs -v {}:/tmp/bitmaps gd2md headless -i {} -d /tmp/docs -b /tmp/bitmaps -r {} -v".format(dir, imgdir, i["docID"], imgdir)
+     print (cmd)
+     os.system(cmd)
+
+
