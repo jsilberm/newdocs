@@ -1,6 +1,5 @@
 ---
 title: Policy and Services Manager (PSM)
-linktitle:  PSM Overview
 categories: [psm]
 menu:
   docs:
